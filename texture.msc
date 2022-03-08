@@ -1,4 +1,4 @@
-(define-module (substratic graphics))
+(define-module (substratic texture))
 
 (define (texture-load file-path :keys smoothing) :export
   (texture-load-internal file-path smoothing))
