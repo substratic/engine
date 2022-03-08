@@ -146,6 +146,8 @@ void subst_texture_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic texture",
       &(MescheNativeFuncDetails[]){
+          {"texture-width", subst_texture_width_msc, true},
+          {"texture-height", subst_texture_height_msc, true},
           {"texture-load-internal", subst_texture_load_msc, true},
           {NULL, NULL, false}});
 }
@@ -160,4 +162,22 @@ Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args) {
   SubstTexture *texture = subst_texture_png_load(file_path->chars, &options);
 
   return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, texture, true));
+}
+
+Value subst_texture_width_msc(MescheMemory *mem, int arg_count, Value *args) {
+  if (arg_count != 1) {
+    subst_log("Function requires 1 parameter.");
+  }
+
+  SubstTexture *texture = (SubstTexture *)AS_POINTER(args[0])->ptr;
+  return NUMBER_VAL(texture->width);
+}
+
+Value subst_texture_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+  if (arg_count != 1) {
+    subst_log("Function requires 1 parameter.");
+  }
+
+  SubstTexture *texture = (SubstTexture *)AS_POINTER(args[0])->ptr;
+  return NUMBER_VAL(texture->height);
 }

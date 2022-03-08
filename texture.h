@@ -24,5 +24,7 @@ Value subst_texture_func_image_load_internal(MescheMemory *mem, int arg_count,
 
 void subst_texture_module_init(VM *vm);
 Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args);
+Value subst_texture_width_msc(MescheMemory *mem, int arg_count, Value *args);
+Value subst_texture_height_msc(MescheMemory *mem, int arg_count, Value *args);
 
 #endif

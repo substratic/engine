@@ -157,6 +157,7 @@ void subst_renderer_draw_rect_fill(SubstRenderer *renderer, float x, float y,
 }
 
 void subst_renderer_draw_args_init(SubstDrawArgs *args, float scale) {
+  args->flags = 0;
   args->shader_program = 0;
   if (scale != 0) {
     args->scale_x = scale;
