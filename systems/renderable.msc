@@ -1,0 +1,11 @@
+(define-module (substratic systems renderable)
+  (import (substratic system)))
+
+(display "LOADED RENDERABLE\n")
+
+(define (renderable-update) :export
+  (display "Renderable is updating!\n"))
+
+(define renderable-system
+  (make-system :updater renderable-update)
+  :export)

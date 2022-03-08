@@ -1,0 +1,10 @@
+(define-module (substratic entity))
+
+(define entity-count 0)
+
+(define-record-type entity
+  (fields id))
+
+(define (entity-create) :export
+  (set! entity-count (+ entity-count 1))
+  (make-entity :id entity-count))
