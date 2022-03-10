@@ -269,14 +269,16 @@ void subst_renderer_draw_texture_ex(SubstRenderer *renderer,
 
   // Model matrix is scaled to size and translated
   mat4 model;
-  glm_translate_make(model, (vec3){x * scale_x, y * scale_y, 0.f});
-  glm_scale(model,
-            (vec3){texture->width * scale_x, texture->height * scale_y, 0.f});
+  glm_translate_make(model, (vec3){x, y, 0.f});
 
-  // Rotate and scale as requested
+  // Rotate if requested
   if (args && (args->flags & SubstDrawRotated) == SubstDrawRotated) {
     glm_rotate(model, glm_rad(args->rotation), (vec3){0.f, 0.f, 1.f});
   }
+
+  // Scale as the last thing we do
+  glm_scale(model,
+            (vec3){texture->width * scale_x, texture->height * scale_y, 0.f});
 
   mat4 view;
   glm_mat4_identity(view);
