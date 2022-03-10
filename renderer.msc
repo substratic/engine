@@ -1,0 +1,4 @@
+(define-module (substratic renderer))
+
+(define (renderer-draw-texture renderer texture x y :keys scale centered) :export
+  (renderer-draw-texture-internal renderer texture x y scale centered))

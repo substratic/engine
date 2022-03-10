@@ -373,7 +373,8 @@ void subst_renderer_module_init(VM *vm) {
           {"renderer-create", subst_renderer_create_msc, true},
           {"renderer-clear", subst_renderer_clear_msc, true},
           {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},
-          {"renderer-draw-texture", subst_renderer_draw_texture_msc, true},
+          {"renderer-draw-texture-internal", subst_renderer_draw_texture_msc,
+           true},
           {NULL, NULL, false}});
 }
 
@@ -426,9 +427,12 @@ Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
   SubstTexture *texture = (SubstTexture *)AS_POINTER(args[1])->ptr;
   int x = AS_NUMBER(args[2]);
   int y = AS_NUMBER(args[3]);
+  float scale = AS_NUMBER(args[4]);
+  bool centered = AS_BOOL(args[5]);
 
   SubstDrawArgs draw_args;
-  subst_renderer_draw_args_init(&draw_args, 2.0);
+  subst_renderer_draw_args_init(&draw_args, scale);
+  subst_renderer_draw_args_center(&draw_args, centered);
   subst_renderer_draw_texture_ex(renderer, texture, x, y, &draw_args);
 
   return T_VAL;
