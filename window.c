@@ -91,16 +91,6 @@ void subst_window_destroy(SubstWindow *window) {
   }
 }
 
-void subst_window_module_init(VM *vm) {
-  mesche_vm_define_native_funcs(
-      vm, "substratic window",
-      &(MescheNativeFuncDetails[]){
-          {"window-create", subst_window_create_msc, true},
-          {"window-show", subst_window_show_msc, true},
-          {"window-needs-close?", subst_window_needs_close_p_msc, true},
-          {NULL, NULL, false}});
-}
-
 Value subst_window_create_msc(MescheMemory *mem, int arg_count, Value *args) {
   if (arg_count != 3) {
     subst_log("Function requires 3 number parameters.");
@@ -123,10 +113,32 @@ Value subst_window_show_msc(MescheMemory *mem, int arg_count, Value *args) {
   return T_VAL;
 }
 
+Value subst_window_width_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  return NUMBER_VAL(((SubstWindow *)ptr->ptr)->width);
+}
+
+Value subst_window_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  return NUMBER_VAL(((SubstWindow *)ptr->ptr)->height);
+}
+
 Value subst_window_needs_close_p_msc(MescheMemory *mem, int arg_count,
                                      Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   glfwPollEvents();
   SubstWindow *window = (SubstWindow *)ptr->ptr;
   return glfwWindowShouldClose(window->glfwWindow) ? T_VAL : NIL_VAL;
+}
+
+void subst_window_module_init(VM *vm) {
+  mesche_vm_define_native_funcs(
+      vm, "substratic window",
+      &(MescheNativeFuncDetails[]){
+          {"window-create", subst_window_create_msc, true},
+          {"window-show", subst_window_show_msc, true},
+          {"window-width", subst_window_width_msc, true},
+          {"window-height", subst_window_height_msc, true},
+          {"window-needs-close?", subst_window_needs_close_p_msc, true},
+          {NULL, NULL, false}});
 }
