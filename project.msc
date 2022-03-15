@@ -1,0 +1,41 @@
+(define-module (substratic engine)
+  (import (mesche fs)
+          (mesche build)
+          (mesche string)
+          (mesche process)))
+
+(project :name "Substratic Engine"
+         :url "https://github.com/substratic/engine"
+         :version "0.0.1"
+         :description "This is the Substratic Engine library.")
+
+(define source-files '(
+    "log.c"
+    "file.c"
+    "renderer.c"
+    "shader.c"
+    "texture.c"
+    "window.c"
+    "glad/src/glad.c"
+    "spng/spng.c"))
+
+(target "lib"
+        (lambda (options)
+          ;; TODO: Make `compile-files` create all intermediate output paths for
+          ;; each input
+          (directory-create "./bin/spng")
+          (directory-create "./bin/cglm")
+          (directory-create "./bin/glad")
+          (directory-create "./bin/glad/src")
+
+          (link-static-library "bin/libsubstratic.a"
+                               (compile-files source-files
+                                              :src-path "./src"
+                                              :out-path "./bin"
+                                              ;; TODO: Don't depend on the parent project's Mesche header if possible
+                                              :c-flags (string-append "-I ../../compiler/include "
+                                                                      "-I ./src/spng/ "
+                                                                      "-I ./src/cglm/ "
+                                                                      "-I ./src/glad/include")))))
+
+(target-default "lib")
