@@ -306,6 +306,135 @@ void subst_renderer_draw_texture_ex(SubstRenderer *renderer,
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void subst_renderer_draw_texture_region_ex(SubstRenderer *renderer,
+                                           SubstTexture *texture, float x,
+                                           float y, float width, float height,
+                                           float texture_x, float texture_y,
+                                           SubstDrawArgs *args) {
+  GLuint shader_program = 0;
+  static GLuint default_shader_program = 0;
+  static GLuint rect_vertex_array = 0;
+  static GLuint rect_vertex_buffer = 0;
+  static GLuint rect_element_buffer = 0;
+
+  if (args != NULL) {
+    shader_program = args->shader_program;
+  }
+
+  // Use the default texture shader if one isn't specified
+  if (shader_program == 0) {
+    if (default_shader_program == 0) {
+      const SubstShaderFile shader_files[] = {
+          {GL_VERTEX_SHADER, TexturedVertexShaderText},
+          {GL_FRAGMENT_SHADER, TexturedFragmentShaderText},
+      };
+      default_shader_program = subst_shader_compile(shader_files, 2);
+    }
+
+    shader_program = default_shader_program;
+  }
+
+  // Use the shader
+  glUseProgram(shader_program);
+
+  if (rect_vertex_array == 0) {
+    glGenVertexArrays(1, &rect_vertex_array);
+    glGenBuffers(1, &rect_vertex_buffer);
+    glGenBuffers(1, &rect_element_buffer);
+
+    glBindVertexArray(rect_vertex_array);
+
+    unsigned int indices[] = {
+        0, 1, 2, // first triangle
+        2, 3, 0  // second triangle
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, rect_vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, NULL, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rect_element_buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                 GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                          (const void *)(2 * sizeof(float)));
+  } else {
+    glBindVertexArray(rect_vertex_array);
+  }
+
+  // Calculate the texture coordinates
+  float texture_u = texture_x / texture->width;
+  float texture_v = texture_y / texture->height;
+  float region_width = width / texture->width;
+  float region_height = height / texture->height;
+
+  // Texture coordinates are 0,0 for bottom left and 1,1 for top right
+  // clang-format off
+  float vertices[] = {
+      // Positions   // Texture
+      width, height, texture_u + region_width, texture_v + region_height, // top right
+      width, 0,      texture_u + region_width, texture_v,                 // bottom right
+      0, 0,          texture_u, texture_v,                                // bottom left
+      0, height,     texture_u, texture_v + region_height,                // top left
+  };
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), &vertices);
+  // clang-format on
+
+  // Adjust position if texture shouldn't be drawn centered
+
+  float scale_x = 1.f, scale_y = 1.f;
+  if (args && (args->flags & SubstDrawScaled) == SubstDrawScaled) {
+    scale_x = args->scale_x;
+    scale_y = args->scale_y;
+  }
+
+  if (args && (args->flags & SubstDrawCentered) == SubstDrawCentered) {
+    x -= width / 2.f * scale_x;
+    y -= height / 2.f * scale_y;
+  }
+
+  // Model matrix is scaled to size and translated
+  mat4 model;
+  glm_translate_make(model, (vec3){x, y, 0.f});
+
+  // Rotate if requested
+  if (args && (args->flags & SubstDrawRotated) == SubstDrawRotated) {
+    glm_rotate(model, glm_rad(args->rotation), (vec3){0.f, 0.f, 1.f});
+  }
+
+  // Scale as the last thing we do
+  glm_scale(model, (vec3){scale_x, scale_y, 0.f});
+
+  mat4 view;
+  glm_mat4_identity(view);
+
+  // Set the uniforms
+  vec4 color = {1.f, 1.f, 1.f, 1.f};
+  glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1,
+                     GL_FALSE, (float *)renderer->screen_matrix);
+  glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE,
+                     (float *)renderer->view_matrix);
+  glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE,
+                     (float *)model);
+  glUniform4fv(glGetUniformLocation(shader_program, "color"), 1,
+               (float *)color);
+
+  // Bind the texture
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture->texture_id);
+  glUniform1i(glGetUniformLocation(shader_program, "tex0"), 0);
+
+  // Draw all 6 indices in the element buffer
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+  // Reset the texture
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void subst_renderer_draw_texture(SubstRenderer *renderer, SubstTexture *texture,
                                  float x, float y) {
   subst_renderer_draw_texture_ex(renderer, texture, x, y, NULL);
@@ -366,18 +495,6 @@ Value subst_renderer_func_render_to_file(MescheMemory *mem, int arg_count,
   memcpy(output_image_path, file_path, strlen(file_path));
 }
 
-void subst_renderer_module_init(VM *vm) {
-  mesche_vm_define_native_funcs(
-      vm, "substratic renderer",
-      &(MescheNativeFuncDetails[]){
-          {"renderer-create", subst_renderer_create_msc, true},
-          {"renderer-clear", subst_renderer_clear_msc, true},
-          {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},
-          {"renderer-draw-texture-internal", subst_renderer_draw_texture_msc,
-           true},
-          {NULL, NULL, false}});
-}
-
 Value subst_renderer_create_msc(MescheMemory *mem, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires 1 parameter.");
@@ -436,4 +553,41 @@ Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
   subst_renderer_draw_texture_ex(renderer, texture, x, y, &draw_args);
 
   return T_VAL;
+}
+
+Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
+                                             Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
+  SubstTexture *texture = (SubstTexture *)AS_POINTER(args[1])->ptr;
+  int x = AS_NUMBER(args[2]);
+  int y = AS_NUMBER(args[3]);
+  int width = AS_NUMBER(args[4]);
+  int height = AS_NUMBER(args[5]);
+  int texture_x = AS_NUMBER(args[6]);
+  int texture_y = AS_NUMBER(args[7]);
+  float scale = AS_NUMBER(args[8]);
+  bool centered = AS_BOOL(args[9]);
+
+  SubstDrawArgs draw_args;
+  subst_renderer_draw_args_init(&draw_args, scale);
+  subst_renderer_draw_args_center(&draw_args, centered);
+  subst_renderer_draw_texture_region_ex(renderer, texture, x, y, width, height,
+                                        texture_x, texture_y, &draw_args);
+
+  return T_VAL;
+}
+
+void subst_renderer_module_init(VM *vm) {
+  mesche_vm_define_native_funcs(
+      vm, "substratic renderer",
+      &(MescheNativeFuncDetails[]){
+          {"renderer-create", subst_renderer_create_msc, true},
+          {"renderer-clear", subst_renderer_clear_msc, true},
+          {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},
+          {"renderer-draw-texture-internal", subst_renderer_draw_texture_msc,
+           true},
+          {"renderer-draw-texture-region-internal",
+           subst_renderer_draw_texture_region_msc, true},
+          {NULL, NULL, false}});
 }
