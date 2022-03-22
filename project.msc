@@ -20,6 +20,10 @@
 
          :deps (list (musl-toolchain))
 
+         ;; TODO: Make deps like this possible!
+         ;; (pkg-config "glfw3")
+         ;; (pkg-config "gl" :exclude-cflags t)
+
          :configs (list (config :name "debug"
                                 :default t
                                 :output-path "./bin/debug"
