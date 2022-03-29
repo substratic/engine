@@ -41,12 +41,11 @@ void subst_renderer_draw_args_scale(SubstDrawArgs *args, float scale_x,
 void subst_renderer_draw_args_rotate(SubstDrawArgs *args, float rotation);
 void subst_renderer_draw_args_center(SubstDrawArgs *args, bool centered);
 
-/* void subst_renderer_draw_texture(SubstRenderContext *context, */
-/*                                  SubstTexture *texture, float x, float y); */
-/* void subst_renderer_draw_texture_ex(SubstRenderContext *context, */
-/*                                     SubstTexture *texture, float x, float y,
- */
-/*                                     SubstDrawArgs *args); */
+void subst_renderer_draw_texture(SubstRenderer *renderer, SubstTexture *texture,
+                                 float x, float y);
+void subst_renderer_draw_texture_ex(SubstRenderer *renderer,
+                                    SubstTexture *texture, float x, float y,
+                                    SubstDrawArgs *args);
 
 void subst_renderer_draw_rect_fill(SubstRenderer *renderer, float x, float y,
                                    float w, float h, vec4 color);
