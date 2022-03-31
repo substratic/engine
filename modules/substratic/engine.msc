@@ -42,7 +42,6 @@
 (define (make-fps-counter) :export
   (let ((fps nil)
         (last-time (time-current-msec)))
-
     (lambda ()
       (let ((time-delta (/ (- (time-current-msec) last-time) 1000)))
         (set! fps

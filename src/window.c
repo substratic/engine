@@ -102,6 +102,7 @@ Value subst_window_create_msc(MescheMemory *mem, int arg_count, Value *args) {
 
   // Create the window
   SubstWindow *window = subst_window_create(width, height, title);
+  window->mesche_mem = mem;
 
   return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, window, true));
 }

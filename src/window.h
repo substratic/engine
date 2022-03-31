@@ -5,10 +5,14 @@
 #include <GLFW/glfw3.h>
 #include <mesche.h>
 
+#include "input.h"
+
 typedef struct {
   int width, height;
   bool is_resizing;
   GLFWwindow *glfwWindow;
+  MescheMemory *mesche_mem;
+  SubstInputState *input_state;
 } SubstWindow;
 
 SubstWindow *subst_window_create(int width, int height, const char *title);

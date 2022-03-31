@@ -581,7 +581,7 @@ Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
 void subst_renderer_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic renderer",
-      &(MescheNativeFuncDetails[]){
+      (MescheNativeFuncDetails[]){
           {"renderer-create", subst_renderer_create_msc, true},
           {"renderer-clear", subst_renderer_clear_msc, true},
           {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},

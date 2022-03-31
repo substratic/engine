@@ -7,6 +7,7 @@
 
 void substratic_library_init(VM *vm) {
   subst_font_module_init(vm);
+  subst_input_module_init(vm);
   subst_window_module_init(vm);
   subst_texture_module_init(vm);
   subst_renderer_module_init(vm);

@@ -1,0 +1,6 @@
+(define-module (substratic input))
+
+(define input-key-code-a 65 :export)
+(define input-key-code-d 68 :export)
+(define input-key-code-s 83 :export)
+(define input-key-code-w 87 :export)

@@ -52,7 +52,7 @@
                                 :description "Builds the Substratic Engine library."
                                 :default t
                                 :runs (steps (compile-source :source-files
-                                                             '("lib.c" "log.c" "file.c" "renderer.c"
+                                                             '("lib.c" "log.c" "file.c" "renderer.c" "input.c"
                                                                "font.c" "shader.c" "texture.c" "window.c"
                                                                "glad/src/glad.c" "spng/spng.c"))
 
