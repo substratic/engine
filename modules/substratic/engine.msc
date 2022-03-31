@@ -1,0 +1,62 @@
+(define-module (substratic engine)
+  (import (mesche math)
+          (mesche time)
+          (mesche string)
+          (substratic renderer)))
+
+(define (run-engine-loop :keys renderer update-func render-func) :export
+  (let ((total-time 0)
+        (target-delta (/ 1 60))
+        (current-time (/ (time-current-msec) 1000))
+        (exit-requested nil))
+    (let next-frame ((new-time 0)
+                     (time-step 0)
+                     (time-delta 0)
+                     (frame-time 0))
+      (begin
+        ;; Calculate the frame time
+        (set! new-time (/ (time-current-msec) 1000))
+        (set! frame-time (- new-time current-time))
+        (set! current-time new-time)
+
+        ;; Update until we reach the delta max
+        (let next-update ()
+          (if (> frame-time 0)
+              (begin
+                (set! time-delta (min frame-time target-delta))
+                (if (not (update-func time-delta))
+                    (set! exit-requested t))
+                (set! frame-time (- frame-time time-delta))
+                (set! total-time (+ total-time time-delta))
+                (next-update))))
+
+        ;; Render the screen and flip the buffers
+        (render-func renderer)
+        (renderer-swap-buffers renderer)
+
+        ;; Next frame!
+        (if (not exit-requested)
+            (next-frame 0 0 0 0)
+            (display "Exiting game loop...\n"))))))
+
+(define (make-fps-counter) :export
+  (let ((fps nil)
+        (last-time (time-current-msec)))
+
+    (lambda ()
+      (let ((time-delta (/ (- (time-current-msec) last-time) 1000)))
+        (set! fps
+              (if fps
+                  ;; Discard spurious measurements
+                  ;; TODO: Why does this happen?
+                  (if (>= (/ 1.0 time-delta) 1000)
+                      fps
+                      (+ (* fps 0.95) (* (/ 1.0 time-delta) 0.05)))
+                  (if (> time-delta 0)
+                      (/ 1.0 time-delta)
+                      nil)))
+
+        (set! last-time (time-current-msec))
+
+        ;; Return the calculated fps
+        fps))))
