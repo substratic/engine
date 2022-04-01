@@ -87,12 +87,12 @@ SubstTexture *subst_texture_png_load(char *file_path,
   texture->height = header.height;
   texture->texture_id = texture_id;
 
-  /* subst_log("The texture \"%s\" is %dx%d\n", file_path, texture->width,
-   * texture->height); */
-  subst_log("The texture \"%s\" is %dx%d\n", file_path, header.width,
-            header.height);
+  /* subst_log("The texture \"%s\" is %dx%d\n", file_path, header.width, */
+  /*           header.height); */
 
-  // TODO: Free the image data
+  // Free the image data and SPNG context
+  free(image_bytes);
+  spng_ctx_free(ctx);
 
   return texture;
 }
