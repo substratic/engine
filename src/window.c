@@ -38,8 +38,6 @@ SubstWindow *subst_window_create(int width, int height, const char *title) {
   // Enable anti-aliasing
   glfwWindowHint(GLFW_SAMPLES, 4);
 
-  printf("ABOUT TO CREATE WINDOW: %d %d\n", width, height);
-
   // Make sure we're notified about errors
   glfwSetErrorCallback(glfw_error_callback);
 
