@@ -320,7 +320,7 @@ Value subst_font_render_text_msc(MescheMemory *mem, int arg_count,
 void subst_font_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic font",
-      &(MescheNativeFuncDetails[]){
+      (MescheNativeFuncDetails[]){
           {"font-load", subst_font_load_msc, true},
           {"font-load-file", subst_font_load_file_msc, true},
           {"font-text-width", subst_font_text_width_msc, true},

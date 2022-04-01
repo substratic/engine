@@ -145,7 +145,7 @@ void subst_texture_png_save(const char *file_path,
 void subst_texture_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic texture",
-      &(MescheNativeFuncDetails[]){
+      (MescheNativeFuncDetails[]){
           {"texture-width", subst_texture_width_msc, true},
           {"texture-height", subst_texture_height_msc, true},
           {"texture-load-internal", subst_texture_load_msc, true},

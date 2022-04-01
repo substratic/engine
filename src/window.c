@@ -1,5 +1,8 @@
-#include "window.h"
 #include <glad/glad.h>
+#include <stdlib.h>
+
+#include "log.h"
+#include "window.h"
 
 static void glfw_error_callback(int error, const char *description) {
   subst_log("GLFW error %d: %s\n", error, description);
@@ -135,7 +138,7 @@ Value subst_window_needs_close_p_msc(MescheMemory *mem, int arg_count,
 void subst_window_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic window",
-      &(MescheNativeFuncDetails[]){
+      (MescheNativeFuncDetails[]){
           {"window-create", subst_window_create_msc, true},
           {"window-show", subst_window_show_msc, true},
           {"window-width", subst_window_width_msc, true},
