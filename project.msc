@@ -11,7 +11,8 @@
                                   (pkg-config "fontconfig" :exclude-libs t)))
 
 (define c-flags
-  (string-append "-I ../../mesche-lang/compiler/include "
+  (string-append "-v "
+                 "-I ../../mesche-lang/compiler/include "
                  "-I ./src/spng/ "
                  "-I ./src/cglm/ "
                  "-I ./src/glad/include "
