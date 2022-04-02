@@ -164,7 +164,7 @@ void subst_font_render_text(SubstRenderer *renderer, SubstFont *font,
 }
 
 int subst_font_text_width(SubstFont *font, const char *text) {
-  float width;
+  float width = 0;
   uint8_t i = 0;
   uint8_t num_chars = strlen(text);
   SubstFontChar *current_char = NULL;
@@ -172,7 +172,7 @@ int subst_font_text_width(SubstFont *font, const char *text) {
   for (i = 0; i < num_chars; i++) {
     // Get the char information
     current_char = font->chars + (text[i] - ASCII_CHAR_START);
-    width += current_char->bearing_x + (current_char->advance >> 6);
+    width += current_char->advance >> 6;
   }
 
   return width;
