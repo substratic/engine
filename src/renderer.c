@@ -537,6 +537,21 @@ Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
   return T_VAL;
 }
 
+Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
+                                   Value *args) {
+  SubstRenderer *renderer = (SubstRenderer *)AS_POINTER(args[0])->ptr;
+  int x = AS_NUMBER(args[1]);
+  int y = AS_NUMBER(args[2]);
+  int width = AS_NUMBER(args[3]);
+  int height = AS_NUMBER(args[4]);
+
+  SubstColor *color = (SubstColor *)AS_POINTER(args[5])->ptr;
+
+  subst_renderer_draw_rect_fill(renderer, x, y, width, height, (float *)color);
+
+  return T_VAL;
+}
+
 Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
                                       Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
@@ -578,6 +593,26 @@ Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
   return T_VAL;
 }
 
+Value subst_renderer_rgb_msc(MescheMemory *mem, int arg_count, Value *args) {
+  SubstColor *color = malloc(sizeof(SubstColor));
+  color->r = AS_NUMBER(args[0]) / 255.0;
+  color->g = AS_NUMBER(args[1]) / 255.0;
+  color->b = AS_NUMBER(args[2]) / 255.0;
+  color->a = 1.0;
+
+  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, color, true));
+}
+
+Value subst_renderer_rgba_msc(MescheMemory *mem, int arg_count, Value *args) {
+  SubstColor *color = malloc(sizeof(SubstColor));
+  color->r = AS_NUMBER(args[0]) / 255.0;
+  color->g = AS_NUMBER(args[1]) / 255.0;
+  color->b = AS_NUMBER(args[2]) / 255.0;
+  color->a = AS_NUMBER(args[3]) / 255.0;
+
+  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, color, true));
+}
+
 void subst_renderer_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic renderer",
@@ -585,9 +620,12 @@ void subst_renderer_module_init(VM *vm) {
           {"renderer-create", subst_renderer_create_msc, true},
           {"renderer-clear", subst_renderer_clear_msc, true},
           {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},
+          {"renderer-draw-rect", subst_renderer_draw_rect_msc, true},
           {"renderer-draw-texture-internal", subst_renderer_draw_texture_msc,
            true},
           {"renderer-draw-texture-region-internal",
            subst_renderer_draw_texture_region_msc, true},
+          {"rgb", subst_renderer_rgb_msc, true},
+          {"rgba", subst_renderer_rgba_msc, true},
           {NULL, NULL, false}});
 }

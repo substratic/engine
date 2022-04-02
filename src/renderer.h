@@ -31,6 +31,13 @@ typedef struct SubstDrawArgs {
   GLuint shader_program;
 } SubstDrawArgs;
 
+typedef struct {
+  float r;
+  float g;
+  float b;
+  float a;
+} SubstColor;
+
 int subst_renderer_init(void);
 void subst_renderer_end(void);
 
