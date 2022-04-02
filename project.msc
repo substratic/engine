@@ -12,10 +12,10 @@
 
 (define c-flags
   (string-append "-v "
-                 "-I ../../mesche-lang/compiler/include "
-                 "-I ./src/spng/ "
-                 "-I ./src/cglm/ "
-                 "-I ./src/glad/include "
+                 "-I../../mesche-lang/compiler/include "
+                 "-I./src/spng/ "
+                 "-I./src/cglm/ "
+                 "-I./src/glad/include "
                  glfw-flags))
 
 ;; (define c-libs "-lm -ldl -lz -L/gnu/store/fbwjgybdnc5rfv13iy2vjzbsx8dkc8ng-glfw-3.3.4/lib -lglfw -L/gnu/store/iq8br1kmi7zd847lh6cx3p0l1hwfg64b-mesa-21.3.2/lib -lGL")
