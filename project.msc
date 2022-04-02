@@ -11,7 +11,7 @@
                                   (pkg-config "fontconfig" :exclude-libs t)))
 
 (define c-flags
-  (string-append "-v "
+  (string-append ;; "-v "
                  "-I../../mesche-lang/compiler/include "
                  "-I./src/spng/ "
                  "-I./src/cglm/ "
@@ -63,6 +63,6 @@
                                              (create-static-library "libsubstratic.a"
                                                                     :c-libs c-libs
                                                                     :c-flags (string-append glfw-flags
-                                                                                            " -I " (path-resolve "./include")
-                                                                                            " -I " (path-resolve "./src/cglm/")
-                                                                                            " -I " (path-resolve "./src/glad/include")))))))
+                                                                                            " -I" (path-resolve "./include")
+                                                                                            " -I" (path-resolve "./src/cglm/")
+                                                                                            " -I" (path-resolve "./src/glad/include")))))))
