@@ -57,7 +57,7 @@
                                 :default t
                                 :runs (steps (compile-source :source-files
                                                              '("lib.c" "log.c" "file.c" "renderer.c" "input.c"
-                                                               "font.c" "shader.c" "texture.c" "window.c"
+                                                               "font.c" "shader.c" "texture.c" "window.c" "physics.c"
                                                                "glad/src/glad.c" "spng/spng.c"))
 
                                              (create-static-library "libsubstratic.a"

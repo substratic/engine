@@ -16,4 +16,6 @@ extern char *subst_font_resolve_path(const char *font_name);
 Value subst_graphics_func_load_font_internal(MescheMemory *mem, int arg_count,
                                              Value *args);
 
+void subst_font_module_init(VM *vm);
+
 #endif
