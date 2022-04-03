@@ -25,9 +25,3 @@ jobs:
 
       - name: Release Build
         run: ./bin/mesche build --config release
-
-      - name: Upload Build Package
-        uses: actions/upload-artifact@v2
-        with:
-          name: crash-the-stack
-          path: dist/*
