@@ -46,7 +46,7 @@ static void subst_renderer_window_size_callback(GLFWwindow *glfwWindow,
   }
 
   // Update the screen size and projection matrix
-  subst_renderer_window_size_update(renderer, width, height);
+  subst_renderer_window_size_update(renderer);
 }
 
 SubstRenderer *subst_renderer_create(SubstWindow *window) {
