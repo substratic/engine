@@ -73,8 +73,8 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
     subst_log("Could not load font: %s\n", font_path);
     return NULL;
   } else {
-    subst_log("Face \"%s\" has %ld glyphs\n", face->family_name,
-              face->num_glyphs);
+    /* subst_log("Face \"%s\" has %ld glyphs\n", face->family_name, */
+    /*           face->num_glyphs); */
   }
 
   // Specify the size of the face needed
