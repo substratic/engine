@@ -6,12 +6,6 @@
 #include "renderer.h"
 #include "window.h"
 
-// Each frame, call an input update funciton like (input-update)
-// input-update will manage a queue of events that can be accessed with the
-// functions:
-// - input-event-peek
-// - input-event-take
-
 Value input_event_create_pointer(MescheMemory *mem, SubstInputEvent event) {
   SubstInputEvent *event_ptr = malloc(sizeof(SubstInputEvent));
   memcpy(event_ptr, &event, 1);
@@ -36,14 +30,17 @@ void input_key_callback(GLFWwindow *window, int key, int scancode, int action,
   SubstRenderer *renderer = (SubstRenderer *)glfwGetWindowUserPointer(window);
   SubstInputState *input_state = renderer->window->input_state;
 
-  SubstInputKeyEvent *input_event = malloc(sizeof(SubstInputKeyEvent));
-  input_event->event.kind =
-      action == GLFW_PRESS ? INPUT_EVENT_KEY_DOWN : INPUT_EVENT_KEY_UP;
-  input_event->event.next_event = NULL;
-  input_event->key_code = key;
-  input_event->key_modifiers = mods;
+  // TODO: We currently don't support key repeat events
+  if (action != GLFW_REPEAT) {
+    SubstInputKeyEvent *input_event = malloc(sizeof(SubstInputKeyEvent));
+    input_event->event.kind =
+        action == GLFW_PRESS ? INPUT_EVENT_KEY_DOWN : INPUT_EVENT_KEY_UP;
+    input_event->event.next_event = NULL;
+    input_event->key_code = key;
+    input_event->key_modifiers = mods;
 
-  input_event_push(input_state, input_event);
+    input_event_push(input_state, input_event);
+  }
 }
 
 void input_cursor_position_callback(GLFWwindow *window, double pos_x,
