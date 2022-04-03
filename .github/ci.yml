@@ -1,0 +1,33 @@
+name: Substratic Engine - CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get --no-install-recommends -y install pkg-config libglfw3 libglfw3-dev zlib1g zlib1g-dev fontconfig libfontconfig1 libfontconfig1-dev mesa-utils mesa-common-dev
+
+      - name: Download Mesche
+        uses: mesche-lang/download-mesche@v1
+        with:
+          artifact-token: ${{ secrets.ARTIFACT_TOKEN }}
+
+      - name: Dev Build
+        run: ./bin/mesche build --config dev
+
+      - name: Release Build
+        run: ./bin/mesche build --config release
+
+      - name: Upload Build Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: crash-the-stack
+          path: dist/*
