@@ -13,9 +13,9 @@ uint8_t subst_renderer_initialized = 0;
 
 static char output_image_path[1024];
 
-static void subst_renderer_window_size_update(SubstRenderer *renderer,
-                                              int width, int height) {
+static void subst_renderer_window_size_update(SubstRenderer *renderer) {
   // Get the current framebuffer size
+  int width, height;
   glfwGetFramebufferSize(renderer->window->glfwWindow, &width, &height);
 
   renderer->window->width = width;
@@ -82,6 +82,9 @@ SubstRenderer *subst_renderer_create(SubstWindow *window) {
   }
 
   subst_log("OpenGL Version %d.%d loaded\n", GLVersion.major, GLVersion.minor);
+
+  // Run the initial size update
+  subst_renderer_window_size_update(renderer);
 
   return renderer;
 }
