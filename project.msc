@@ -7,7 +7,6 @@
 
 ;; (define glfw-flags "-I/gnu/store/fbwjgybdnc5rfv13iy2vjzbsx8dkc8ng-glfw-3.3.4/include -I/gnu/store/in9a705nl7k6hql7hn2f4hic2dhxk8mq-libx11-1.7.3.1/include -I/gnu/store/msb7kyg7f0bzbxp4f1s5kdiymb5gblwc-libxcb-1.14/include -I/gnu/store/9k6slxs8ynz46h85bcy3zk2mx0nn8rpf-libxau-1.0.9/include -I/gnu/store/dfzp4rhkzqqagx3djn2kcnaflz1m8446-libxdmcp-1.1.3/include -I/gnu/store/vfak5v1d0hjgq6p845r809vrf4kplsnz-xorgproto-2021.5/include")
 (define glfw-flags (string-append (pkg-config "glfw3" :exclude-libs t)
-                                  " "
                                   (pkg-config "fontconfig" :exclude-libs t)))
 
 (define c-flags
