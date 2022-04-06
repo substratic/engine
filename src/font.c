@@ -72,9 +72,6 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
   if (face == NULL) {
     subst_log("Could not load font: %s\n", font_path);
     return NULL;
-  } else {
-    /* subst_log("Face \"%s\" has %ld glyphs\n", face->family_name, */
-    /*           face->num_glyphs); */
   }
 
   // Specify the size of the face needed
@@ -87,13 +84,9 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
   // Remove alignment restriction
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  // Does the font have kerning?
-  /* subst_log("Has kerning: %d\n", FT_HAS_KERNING(face)); */
-
   // Load glyphs for each character
   for (char_id = ASCII_CHAR_START; char_id < ASCII_CHAR_END; char_id++) {
     // Load the character glyph and information
-    /* subst_log("Loading glyph for char: %c\n", char_id); */
     if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
       subst_log("Failed to load Glyph: %c\n", char_id);
       return NULL;
@@ -121,9 +114,9 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   }
 
-  // Free the face
-  // TODO: Fix this!
-  /* FT_Done_Face(face); */
+  // Free the face and the FreeType library
+  FT_Done_Face(face);
+  FT_Done_FreeType(ft);
 
   return subst_font;
 }
