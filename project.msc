@@ -25,8 +25,8 @@
                   (pkg-config "gl" :exclude-cflags t) " "
                   (pkg-config "fontconfig" :exclude-cflags t)))
 
-(display (string-append "c-flags: " c-flags "\n"))
-(display (string-append "c-libs: " c-libs "\n"))
+;; (display (string-append "c-flags: " c-flags "\n"))
+;; (display (string-append "c-libs: " c-libs "\n"))
 
 (project :name "Substratic Engine"
          :url "https://github.com/substratic/engine"
