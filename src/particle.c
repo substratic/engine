@@ -34,28 +34,45 @@ typedef struct {
   int oldest_particle;
 } SubstParticleSource;
 
+void particle_source_free_func(MescheMemory *mem, void *obj) {
+  SubstParticleSource *source = (SubstParticleSource *)obj;
+  free(source->particles);
+  free(source);
+}
+
+const ObjectPointerType SubstParticleSourceType = {
+    .name = "particle-source", .free_func = particle_source_free_func};
+
 typedef struct {
-  int num_sources;
   float current_time;
   float origin_x, origin_y;
-  SubstParticleSource **sources;
+  ObjectArray *sources;
 } SubstParticleSystem;
+
+void particle_system_mark_func(MescheMemory *mem, void *obj) {
+  SubstParticleSystem *system = (SubstParticleSystem *)obj;
+  mesche_mem_mark_object((VM *)mem, (Object *)system->sources);
+}
+
+const ObjectPointerType SubstParticleSystemType = {
+    .name = "particle-system", .mark_func = particle_system_mark_func};
 
 Value subst_particle_make_system_msc(MescheMemory *mem, int arg_count,
                                      Value *args) {
   SubstParticleSystem *system = malloc(sizeof(SubstParticleSystem));
-  system->sources = malloc(sizeof(SubstParticleSource *) * arg_count);
-  system->num_sources = arg_count;
+  system->sources = mesche_object_make_array(
+      (VM *)mem); // malloc(sizeof(SubstParticleSource *) * arg_count);
   system->current_time = 0;
   system->origin_x = 0;
   system->origin_y = 0;
 
   // Read in and process every particle source argument
   for (int i = 0; i < arg_count; i++) {
-    system->sources[i] = ((SubstParticleSource *)AS_POINTER(args[i])->ptr);
+    mesche_value_array_write(mem, &system->sources->objects, args[i]);
   }
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, system, true));
+  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, system,
+                                                    &SubstParticleSystemType));
 }
 
 void read_particle_factor(SubstParticleFactor *factor, Value *args,
@@ -108,7 +125,8 @@ Value subst_particle_make_source_msc(MescheMemory *mem, int arg_count,
   /*                                interval lifetime */
   /*                                vel-x vel-y) */
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, source, true));
+  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, source,
+                                                    &SubstParticleSourceType));
 }
 
 double rand_double(double min, double max) {
@@ -121,6 +139,12 @@ double particle_factor_next_value(SubstParticleFactor *factor) {
   return rand_double(factor->min, factor->max);
 }
 
+SubstParticleSource *particle_system_source(SubstParticleSystem *system,
+                                            int index) {
+  return (SubstParticleSource
+              *)(AS_POINTER(system->sources->objects.values[index])->ptr);
+}
+
 Value subst_particle_system_update_msc(MescheMemory *mem, int arg_count,
                                        Value *args) {
   SubstParticleSystem *system =
@@ -131,9 +155,9 @@ Value subst_particle_system_update_msc(MescheMemory *mem, int arg_count,
   system->current_time += time_delta;
 
   // Update each of the sources
-  for (int i = 0; i < system->num_sources; i++) {
+  for (int i = 0; i < system->sources->objects.count; i++) {
     // Has the creation interval passed?
-    SubstParticleSource *source = system->sources[i];
+    SubstParticleSource *source = particle_system_source(system, i);
     if (system->current_time >= source->next_particle_time) {
       // Initialize the new particle
       SubstParticle *particle = NULL;
@@ -192,11 +216,12 @@ Value subst_particle_system_render_msc(MescheMemory *mem, int arg_count,
   // TODO: Use OpenGL instanced arrays for this instead!
 
   // Render each of the sources
-  for (int i = 0; i < system->num_sources; i++) {
+  for (int i = 0; i < system->sources->objects.count; i++) {
     // Render each of the particles
-    for (int j = 0; j < system->sources[i]->num_particles; j++) {
+    SubstParticleSource *source = particle_system_source(system, i);
+    for (int j = 0; j < source->num_particles; j++) {
       // TODO: Offset based on oldest_particle
-      SubstParticle *particle = &system->sources[i]->particles[j];
+      SubstParticle *particle = &source->particles[j];
       if (particle->time_left > 0) {
         subst_renderer_draw_rect_fill(
             renderer, particle->pos_x, particle->pos_y, particle->size,
