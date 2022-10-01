@@ -1,10 +1,36 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <mesche.h>
 #include <stdlib.h>
 
 #include "input.h"
 #include "renderer.h"
 #include "window.h"
+
+void input_free_func(MescheMemory *mem, void *obj) {
+  SubstInputState *input_state = (SubstInputState *)obj;
+
+  // Free all remaining events
+  SubstInputEvent *event = input_state->first_event;
+  while (event != NULL) {
+    SubstInputEvent *this = event;
+    event = event->next_event;
+    free(this);
+  }
+
+  free(input_state);
+}
+
+void input_event_free_func(MescheMemory *mem, void *obj) {
+  SubstInputEvent *input_event = (SubstInputEvent *)obj;
+  free(input_event);
+}
+
+const ObjectPointerType SubstInputStateType = {.name = "input-state",
+                                               .free_func = input_free_func};
+
+const ObjectPointerType SubstInputEventType = {
+    .name = "input-event", .free_func = input_event_free_func};
 
 Value input_event_create_pointer(MescheMemory *mem, SubstInputEvent event) {
   SubstInputEvent *event_ptr = malloc(sizeof(SubstInputEvent));
@@ -72,7 +98,8 @@ Value input_init_msc(MescheMemory *mem, int arg_count, Value *args) {
   glfwSetKeyCallback(window->glfwWindow, input_key_callback);
   glfwSetCursorPosCallback(window->glfwWindow, input_cursor_position_callback);
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, input_state, true));
+  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_state,
+                                                    &SubstInputStateType));
 }
 
 Value input_event_peek_msc(MescheMemory *mem, int arg_count, Value *args) {
@@ -102,7 +129,8 @@ Value input_event_take_msc(MescheMemory *mem, int arg_count, Value *args) {
       input_state->last_event = NULL;
     }
 
-    return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, input_event, true));
+    return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_event,
+                                                      &SubstInputEventType));
   } else {
     return NIL_VAL;
   }
