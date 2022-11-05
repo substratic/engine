@@ -8,8 +8,12 @@
 ;;                        :vel-x '(-0.2 0.2)
 ;;                        :vel-y '(0.8 1.0)))
 
-(define (make-particle-source :keys geometry max-particles size color interval lifetime vel-x vel-y) :export
-  (make-particle-source-internal max-particles geometry
-                                 color size
-                                 interval lifetime
-                                 vel-x vel-y))
+(define (make-particle-source . args) :export
+  (make-particle-source-internal (plist-ref args :max-particles)
+                                 (plist-ref args :geometry)
+                                 (plist-ref args :color)
+                                 (plist-ref args :size)
+                                 (plist-ref args :interval)
+                                 (plist-ref args :lifetime)
+                                 (plist-ref args :vel-x)
+                                 (plist-ref args :vel-y)))

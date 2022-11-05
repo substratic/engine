@@ -1,13 +1,18 @@
 (define-module (substratic renderer))
 
-(define (renderer-draw-texture renderer texture x y :keys scale centered) :export
-  (renderer-draw-texture-internal renderer texture x y scale centered))
+(define (renderer-draw-texture renderer texture x y . args) :export
+  (renderer-draw-texture-internal renderer
+                                  texture
+                                  x y
+                                  (plist-ref args :scale)
+                                  (plist-ref args :centered)))
 
 (define (renderer-draw-texture-region renderer texture
                                       x y width height
                                       texture-x texture-y
-                                      :keys scale centered) :export
+                                      . args) :export
                                       (renderer-draw-texture-region-internal renderer texture
                                                                              x y width height
                                                                              texture-x texture-y
-                                                                             scale centered))
+                                                                             (plist-ref args :scale)
+                                                                             (plist-ref args :centered)))
