@@ -5,24 +5,21 @@
           (mesche project)
           (mesche string)))
 
-;; (define glfw-flags "-I/gnu/store/fbwjgybdnc5rfv13iy2vjzbsx8dkc8ng-glfw-3.3.4/include -I/gnu/store/in9a705nl7k6hql7hn2f4hic2dhxk8mq-libx11-1.7.3.1/include -I/gnu/store/msb7kyg7f0bzbxp4f1s5kdiymb5gblwc-libxcb-1.14/include -I/gnu/store/9k6slxs8ynz46h85bcy3zk2mx0nn8rpf-libxau-1.0.9/include -I/gnu/store/dfzp4rhkzqqagx3djn2kcnaflz1m8446-libxdmcp-1.1.3/include -I/gnu/store/vfak5v1d0hjgq6p845r809vrf4kplsnz-xorgproto-2021.5/include")
-(define glfw-flags (string-append (pkg-config "glfw3" :exclude-libs #t)
-                                  (pkg-config "fontconfig" :exclude-libs #t)))
+(define glfw-flags (string-append (string-trim (pkg-config "glfw3" :exclude-libs #t))
+                                  " "
+                                  (string-trim (pkg-config "fontconfig" :exclude-libs #t))))
 
 (define c-flags
-  (string-append ;; "-v "
-                 "-I./src/spng/ "
+  (string-append "-I./src/spng/ "
                  "-I./src/cglm/ "
                  "-I./src/glad/include "
                  glfw-flags))
 
-;; (define c-libs "-lm -ldl -lz -L/gnu/store/fbwjgybdnc5rfv13iy2vjzbsx8dkc8ng-glfw-3.3.4/lib -lglfw -L/gnu/store/iq8br1kmi7zd847lh6cx3p0l1hwfg64b-mesa-21.3.2/lib -lGL")
-
 (define c-libs
   (string-append  "-lm -ldl -lz "
-                  (pkg-config "glfw3" :exclude-cflags #t) " "
-                  (pkg-config "gl" :exclude-cflags #t) " "
-                  (pkg-config "fontconfig" :exclude-cflags #t)))
+                  (string-trim (pkg-config "glfw3" :exclude-cflags #t)) " "
+                  (string-trim (pkg-config "gl" :exclude-cflags #t)) " "
+                  (string-trim (pkg-config "fontconfig" :exclude-cflags #t))))
 
 (project :name "Substratic Engine"
          :url "https://github.com/substratic/engine"
@@ -33,7 +30,7 @@
                                 :default #t
                                 :output-path "./bin/dev"
                                 :c-libs c-libs
-                                :c-flags (string-append "-O0 -g -ggdb -DDEBUG -fsanitize=address "
+                                :c-flags (string-append "-O0 -g -ggdb -DDEV_BUILD -DDEBUG -fsanitize=address "
                                                         c-flags))
                         (config :name "debug"
                                 :default #t
@@ -56,10 +53,14 @@
                                                            "particle.c" "glad/src/glad.c" "spng/spng.c")
                                                          :c-flags (from-context '(config mesche-compiler:lib) :c-flags)
                                                          :c-libs (from-context '(config mesche-compiler:lib) :c-libs))
+
                                          (create-static-library :library-name "libsubstratic.a"
                                                                 :input-files (from-context 'substratic-engine:lib/compile-source
                                                                                            :object-files))
-                                         (provide-context :c-libs c-libs
+
+                                         (provide-context :library-path (from-context 'substratic-engine:lib/static-library
+                                                                                      :library-path)
+                                                          :c-libs c-libs
                                                           :c-flags (string-append glfw-flags
                                                                                   " -I" (path-resolve "./include")
                                                                                   " -I" (path-resolve "./src/cglm/")
