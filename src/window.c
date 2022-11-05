@@ -112,7 +112,7 @@ Value subst_window_show_msc(MescheMemory *mem, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   subst_window_show((SubstWindow *)ptr->ptr);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_window_width_msc(MescheMemory *mem, int arg_count, Value *args) {
@@ -130,7 +130,7 @@ Value subst_window_needs_close_p_msc(MescheMemory *mem, int arg_count,
   ObjectPointer *ptr = AS_POINTER(args[0]);
   glfwPollEvents();
   SubstWindow *window = (SubstWindow *)ptr->ptr;
-  return glfwWindowShouldClose(window->glfwWindow) ? T_VAL : NIL_VAL;
+  return glfwWindowShouldClose(window->glfwWindow) ? TRUE_VAL : FALSE_VAL;
 }
 
 void subst_window_module_init(VM *vm) {

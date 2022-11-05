@@ -307,7 +307,7 @@ Value subst_font_render_text_msc(MescheMemory *mem, int arg_count,
 
   subst_font_render_text(renderer, font, text, pos_x, pos_y);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 void subst_font_module_init(VM *vm) {

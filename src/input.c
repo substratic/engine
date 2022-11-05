@@ -112,7 +112,7 @@ Value input_event_peek_msc(MescheMemory *mem, int arg_count, Value *args) {
     return OBJECT_VAL(
         mesche_object_make_pointer((VM *)mem, input_event, false));
   } else {
-    return NIL_VAL;
+    return FALSE_VAL;
   }
 }
 
@@ -132,7 +132,7 @@ Value input_event_take_msc(MescheMemory *mem, int arg_count, Value *args) {
     return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_event,
                                                       &SubstInputEventType));
   } else {
-    return NIL_VAL;
+    return FALSE_VAL;
   }
 }
 

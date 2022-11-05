@@ -526,7 +526,7 @@ Value subst_renderer_clear_msc(MescheMemory *mem, int arg_count, Value *args) {
   glClearColor(r / 255.0, g / 255.0, b / 255.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
@@ -537,7 +537,7 @@ Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
   // Swap the render buffers
   glfwSwapBuffers(renderer->window->glfwWindow);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
@@ -552,7 +552,7 @@ Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
 
   subst_renderer_draw_rect_fill(renderer, x, y, width, height, (float *)color);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
@@ -570,7 +570,7 @@ Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
   subst_renderer_draw_args_center(&draw_args, centered);
   subst_renderer_draw_texture_ex(renderer, texture, x, y, &draw_args);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
@@ -593,7 +593,7 @@ Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
   subst_renderer_draw_texture_region_ex(renderer, texture, x, y, width, height,
                                         texture_x, texture_y, &draw_args);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_renderer_rgb_msc(MescheMemory *mem, int arg_count, Value *args) {

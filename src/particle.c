@@ -51,7 +51,7 @@ typedef struct {
 
 void particle_system_mark_func(MescheMemory *mem, void *obj) {
   SubstParticleSystem *system = (SubstParticleSystem *)obj;
-  mesche_mem_mark_object((VM *)mem, (Object *)system->sources);
+  mesche_gc_mark_object((VM *)mem, (Object *)system->sources);
 }
 
 const ObjectPointerType SubstParticleSystemType = {
@@ -204,7 +204,7 @@ Value subst_particle_system_update_msc(MescheMemory *mem, int arg_count,
     }
   }
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_particle_system_render_msc(MescheMemory *mem, int arg_count,
@@ -230,7 +230,7 @@ Value subst_particle_system_render_msc(MescheMemory *mem, int arg_count,
     }
   }
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 Value subst_particle_system_origin_set_msc(MescheMemory *mem, int arg_count,
@@ -244,7 +244,7 @@ Value subst_particle_system_origin_set_msc(MescheMemory *mem, int arg_count,
   system->origin_x = AS_NUMBER(args[1]);
   system->origin_y = AS_NUMBER(args[2]);
 
-  return T_VAL;
+  return TRUE_VAL;
 }
 
 void subst_particle_module_init(VM *vm) {

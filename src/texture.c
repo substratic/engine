@@ -158,7 +158,7 @@ Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args) {
   }
 
   ObjectString *file_path = AS_STRING(args[0]);
-  SubstTextureOptions options = {.use_smoothing = !IS_NIL(args[1])};
+  SubstTextureOptions options = {.use_smoothing = !IS_FALSE(args[1])};
   SubstTexture *texture = subst_texture_png_load(file_path->chars, &options);
 
   return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, texture, true));
