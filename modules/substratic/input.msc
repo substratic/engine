@@ -1,5 +1,9 @@
 (define-module (substratic input))
 
+(define input-mouse-button-left 0 :export)
+(define input-mouse-button-right 1 :export)
+(define input-mouse-button-center 2 :export)
+
 (define input-key-code-space 32 :export)
 (define input-key-code-0 48 :export)
 (define input-key-code-1 49 :export)
@@ -39,3 +43,5 @@
 (define input-key-code-x 88 :export)
 (define input-key-code-y 89 :export)
 (define input-key-code-z 90 :export)
+
+(define input-key-code-tab 258 :export)

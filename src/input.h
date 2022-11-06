@@ -8,10 +8,9 @@ typedef enum {
   INPUT_EVENT_KEY_UP,
   INPUT_EVENT_KEY_DOWN,
   INPUT_EVENT_MOUSE_MOVE,
-  INPUT_EVENT_MOUSE_LEFT_UP,
-  INPUT_EVENT_MOUSE_LEFT_DOWN,
-  INPUT_EVENT_MOUSE_RIGHT_UP,
-  INPUT_EVENT_MOUSE_RIGHT_DOWN,
+  INPUT_EVENT_MOUSE_SCROLL,
+  INPUT_EVENT_MOUSE_BUTTON_UP,
+  INPUT_EVENT_MOUSE_BUTTON_DOWN,
 } SubstInputEventKind;
 
 typedef struct SubstInputEvent {
@@ -30,6 +29,18 @@ typedef struct {
   double pos_x;
   double pos_y;
 } SubstInputMouseMoveEvent;
+
+typedef struct {
+  SubstInputEvent event;
+  double offset_x;
+  double offset_y;
+} SubstInputMouseScrollEvent;
+
+typedef struct {
+  SubstInputEvent event;
+  int button;
+  int modifiers;
+} SubstInputMouseButtonEvent;
 
 typedef struct {
   SubstInputEvent *first_event;

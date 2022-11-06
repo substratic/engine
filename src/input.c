@@ -65,12 +65,29 @@ void input_key_callback(GLFWwindow *window, int key, int scancode, int action,
     input_event->key_code = key;
     input_event->key_modifiers = mods;
 
-    input_event_push(input_state, input_event);
+    input_event_push(input_state, (SubstInputEvent *)input_event);
   }
 }
 
-void input_cursor_position_callback(GLFWwindow *window, double pos_x,
-                                    double pos_y) {
+void input_mouse_button_callback(GLFWwindow *window, int button, int action,
+                                 int mods) {
+  // TODO: Don't have SubstRenderer be the top-level engine state type
+  SubstRenderer *renderer = (SubstRenderer *)glfwGetWindowUserPointer(window);
+  SubstInputState *input_state = renderer->window->input_state;
+
+  SubstInputMouseButtonEvent *input_event =
+      malloc(sizeof(SubstInputMouseButtonEvent));
+  input_event->event.kind = action == GLFW_PRESS ? INPUT_EVENT_MOUSE_BUTTON_DOWN
+                                                 : INPUT_EVENT_MOUSE_BUTTON_UP;
+  input_event->event.next_event = NULL;
+  input_event->button = button;
+  input_event->modifiers = mods;
+
+  input_event_push(input_state, (SubstInputEvent *)input_event);
+}
+
+void input_mouse_position_callback(GLFWwindow *window, double pos_x,
+                                   double pos_y) {
   // TODO: Don't have SubstRenderer be the top-level engine state type
   SubstRenderer *renderer = (SubstRenderer *)glfwGetWindowUserPointer(window);
   SubstInputState *input_state = renderer->window->input_state;
@@ -82,7 +99,23 @@ void input_cursor_position_callback(GLFWwindow *window, double pos_x,
   input_event->pos_x = pos_x;
   input_event->pos_y = pos_y;
 
-  input_event_push(input_state, input_event);
+  input_event_push(input_state, (SubstInputEvent *)input_event);
+}
+
+void input_mouse_scroll_callback(GLFWwindow *window, double offset_x,
+                                 double offset_y) {
+  // TODO: Don't have SubstRenderer be the top-level engine state type
+  SubstRenderer *renderer = (SubstRenderer *)glfwGetWindowUserPointer(window);
+  SubstInputState *input_state = renderer->window->input_state;
+
+  SubstInputMouseScrollEvent *input_event =
+      malloc(sizeof(SubstInputMouseScrollEvent));
+  input_event->event.kind = INPUT_EVENT_MOUSE_SCROLL;
+  input_event->event.next_event = NULL;
+  input_event->offset_x = offset_x;
+  input_event->offset_y = offset_y;
+
+  input_event_push(input_state, (SubstInputEvent *)input_event);
 }
 
 Value input_init_msc(MescheMemory *mem, int arg_count, Value *args) {
@@ -96,7 +129,9 @@ Value input_init_msc(MescheMemory *mem, int arg_count, Value *args) {
   // Set up GLFW input callbacks
   window->input_state = input_state;
   glfwSetKeyCallback(window->glfwWindow, input_key_callback);
-  glfwSetCursorPosCallback(window->glfwWindow, input_cursor_position_callback);
+  glfwSetScrollCallback(window->glfwWindow, input_mouse_scroll_callback);
+  glfwSetMouseButtonCallback(window->glfwWindow, input_mouse_button_callback);
+  glfwSetCursorPosCallback(window->glfwWindow, input_mouse_position_callback);
 
   return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_state,
                                                     &SubstInputStateType));
@@ -144,14 +179,14 @@ Value input_event_key_code_msc(MescheMemory *mem, int arg_count, Value *args) {
 
 Value input_event_key_down_msc(MescheMemory *mem, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
-  SubstInputKeyEvent *input_event = (SubstInputKeyEvent *)ptr->ptr;
-  return BOOL_VAL(input_event->event.kind == INPUT_EVENT_KEY_DOWN);
+  SubstInputEvent *input_event = (SubstInputEvent *)(ptr->ptr);
+  return BOOL_VAL(input_event->kind == INPUT_EVENT_KEY_DOWN);
 }
 
 Value input_event_key_up_msc(MescheMemory *mem, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
-  SubstInputKeyEvent *input_event = (SubstInputKeyEvent *)ptr->ptr;
-  return BOOL_VAL(input_event->event.kind == INPUT_EVENT_KEY_UP);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  return BOOL_VAL(input_event->kind == INPUT_EVENT_KEY_UP);
 }
 
 Value input_event_mouse_x_msc(MescheMemory *mem, int arg_count, Value *args) {
@@ -175,6 +210,51 @@ Value input_event_mouse_move_msc(MescheMemory *mem, int arg_count,
   return BOOL_VAL(input_event->event.kind == INPUT_EVENT_MOUSE_MOVE);
 }
 
+Value input_event_mouse_button_down_msc(MescheMemory *mem, int arg_count,
+                                        Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_BUTTON_DOWN);
+}
+
+Value input_event_mouse_button_up_msc(MescheMemory *mem, int arg_count,
+                                      Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_BUTTON_UP);
+}
+
+Value input_event_mouse_button_msc(MescheMemory *mem, int arg_count,
+                                   Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputMouseButtonEvent *input_event =
+      (SubstInputMouseButtonEvent *)ptr->ptr;
+  return NUMBER_VAL(input_event->button);
+}
+
+Value input_event_mouse_scroll_msc(MescheMemory *mem, int arg_count,
+                                   Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_SCROLL);
+}
+
+Value input_event_mouse_scroll_x_msc(MescheMemory *mem, int arg_count,
+                                     Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputMouseScrollEvent *input_event =
+      (SubstInputMouseScrollEvent *)ptr->ptr;
+  return NUMBER_VAL(input_event->offset_x);
+}
+
+Value input_event_mouse_scroll_y_msc(MescheMemory *mem, int arg_count,
+                                     Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputMouseScrollEvent *input_event =
+      (SubstInputMouseScrollEvent *)ptr->ptr;
+  return NUMBER_VAL(input_event->offset_y);
+}
+
 void subst_input_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic input",
@@ -193,5 +273,13 @@ void subst_input_module_init(VM *vm) {
           {"input-event-mouse-x", input_event_mouse_x_msc, true},
           {"input-event-mouse-y", input_event_mouse_y_msc, true},
           {"input-event-mouse-move?", input_event_mouse_move_msc, true},
+          {"input-event-mouse-button-down?", input_event_mouse_button_down_msc,
+           true},
+          {"input-event-mouse-button-up?", input_event_mouse_button_up_msc,
+           true},
+          {"input-event-mouse-button", input_event_mouse_button_msc, true},
+          {"input-event-mouse-scroll?", input_event_mouse_scroll_msc, true},
+          {"input-event-mouse-scroll-x", input_event_mouse_scroll_x_msc, true},
+          {"input-event-mouse-scroll-y", input_event_mouse_scroll_y_msc, true},
           {NULL, NULL, false}});
 }
