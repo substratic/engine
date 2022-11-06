@@ -15,6 +15,7 @@ typedef struct {
   vec2 desired_size;
   mat4 screen_matrix;
   mat4 view_matrix;
+  float scale;
 } SubstRenderer;
 
 typedef enum {

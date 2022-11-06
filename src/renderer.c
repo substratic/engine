@@ -63,7 +63,6 @@ SubstRenderer *subst_renderer_create(SubstWindow *window) {
 
   // Set up the default view matrix
   glm_mat4_identity(renderer->view_matrix);
-  /* glm_scale(renderer->view_matrix, (vec3){1.f, 1.f, 1.f}); */
 
   // Set the "user pointer" of the GLFW window to our renderer
   glfwSetWindowUserPointer(window->glfwWindow, renderer);
@@ -540,6 +539,20 @@ Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
+Value subst_renderer_scale_set_msc(MescheMemory *mem, int arg_count,
+                                   Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
+  renderer->scale = AS_NUMBER(args[1]);
+
+  // Apply the scale to the view matrix after resetting it
+  glm_mat4_identity(renderer->view_matrix);
+  glm_scale(renderer->view_matrix,
+            (vec3){renderer->scale, renderer->scale, 1.f});
+
+  return UNSPECIFIED_VAL;
+}
+
 Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
                                    Value *args) {
   SubstRenderer *renderer = (SubstRenderer *)AS_POINTER(args[0])->ptr;
@@ -623,6 +636,7 @@ void subst_renderer_module_init(VM *vm) {
           {"renderer-create", subst_renderer_create_msc, true},
           {"renderer-clear", subst_renderer_clear_msc, true},
           {"renderer-swap-buffers", subst_renderer_swap_buffers_msc, true},
+          {"renderer-scale-set!", subst_renderer_scale_set_msc, true},
           {"renderer-draw-rect", subst_renderer_draw_rect_msc, true},
           {"renderer-draw-texture-internal", subst_renderer_draw_texture_msc,
            true},
