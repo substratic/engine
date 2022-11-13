@@ -63,7 +63,7 @@ void input_key_callback(GLFWwindow *window, int key, int scancode, int action,
         action == GLFW_PRESS ? INPUT_EVENT_KEY_DOWN : INPUT_EVENT_KEY_UP;
     input_event->event.next_event = NULL;
     input_event->key_code = key;
-    input_event->key_modifiers = mods;
+    input_event->modifiers = mods;
 
     input_event_push(input_state, (SubstInputEvent *)input_event);
   }
@@ -189,6 +189,42 @@ Value input_event_key_up_msc(MescheMemory *mem, int arg_count, Value *args) {
   return BOOL_VAL(input_event->kind == INPUT_EVENT_KEY_UP);
 }
 
+#define CHECK_MODIFIER(the_modifier)                                           \
+  if (input_event->kind == INPUT_EVENT_KEY_UP ||                               \
+      input_event->kind == INPUT_EVENT_KEY_DOWN) {                             \
+    return BOOL_VAL((((SubstInputKeyEvent *)input_event)->modifiers &          \
+                     the_modifier) == the_modifier);                           \
+  } else if (input_event->kind == INPUT_EVENT_MOUSE_BUTTON_UP ||               \
+             input_event->kind == INPUT_EVENT_MOUSE_BUTTON_DOWN) {             \
+    return BOOL_VAL((((SubstInputMouseButtonEvent *)input_event)->modifiers &  \
+                     the_modifier) == the_modifier);                           \
+  }                                                                            \
+  return FALSE_VAL;
+
+Value input_event_mod_ctrl_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  CHECK_MODIFIER(GLFW_MOD_CONTROL);
+}
+
+Value input_event_mod_alt_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  CHECK_MODIFIER(GLFW_MOD_ALT);
+}
+
+Value input_event_mod_super_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  CHECK_MODIFIER(GLFW_MOD_SUPER);
+}
+
+Value input_event_mod_shift_msc(MescheMemory *mem, int arg_count, Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
+  CHECK_MODIFIER(GLFW_MOD_SHIFT);
+}
+
 Value input_event_mouse_x_msc(MescheMemory *mem, int arg_count, Value *args) {
   // TODO: Check event kind!
   ObjectPointer *ptr = AS_POINTER(args[0]);
@@ -268,6 +304,12 @@ void subst_input_module_init(VM *vm) {
           {"input-event-key-code", input_event_key_code_msc, true},
           {"input-event-key-down?", input_event_key_down_msc, true},
           {"input-event-key-up?", input_event_key_up_msc, true},
+
+          // Modifiers for events
+          {"input-event-modifier-ctrl?", input_event_mod_ctrl_msc, true},
+          {"input-event-modifier-alt?", input_event_mod_alt_msc, true},
+          {"input-event-modifier-super?", input_event_mod_super_msc, true},
+          {"input-event-modifier-shift?", input_event_mod_shift_msc, true},
 
           // Mouse events
           {"input-event-mouse-x", input_event_mouse_x_msc, true},

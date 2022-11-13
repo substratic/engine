@@ -21,7 +21,7 @@ typedef struct SubstInputEvent {
 typedef struct {
   SubstInputEvent event;
   int key_code;
-  int key_modifiers;
+  int modifiers;
 } SubstInputKeyEvent;
 
 typedef struct {
