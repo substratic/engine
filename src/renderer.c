@@ -629,6 +629,34 @@ Value subst_renderer_rgba_msc(MescheMemory *mem, int arg_count, Value *args) {
   return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, color, true));
 }
 
+Value subst_renderer_color_r_msc(MescheMemory *mem, int arg_count,
+                                 Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstColor *color = (SubstColor *)ptr->ptr;
+  return NUMBER_VAL(color->r * 255.0);
+}
+
+Value subst_renderer_color_g_msc(MescheMemory *mem, int arg_count,
+                                 Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstColor *color = (SubstColor *)ptr->ptr;
+  return NUMBER_VAL(color->g * 255.0);
+}
+
+Value subst_renderer_color_b_msc(MescheMemory *mem, int arg_count,
+                                 Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstColor *color = (SubstColor *)ptr->ptr;
+  return NUMBER_VAL(color->b * 255.0);
+}
+
+Value subst_renderer_color_a_msc(MescheMemory *mem, int arg_count,
+                                 Value *args) {
+  ObjectPointer *ptr = AS_POINTER(args[0]);
+  SubstColor *color = (SubstColor *)ptr->ptr;
+  return NUMBER_VAL(color->a * 255.0);
+}
+
 void subst_renderer_module_init(VM *vm) {
   mesche_vm_define_native_funcs(
       vm, "substratic renderer",
@@ -644,5 +672,9 @@ void subst_renderer_module_init(VM *vm) {
            subst_renderer_draw_texture_region_msc, true},
           {"rgb", subst_renderer_rgb_msc, true},
           {"rgba", subst_renderer_rgba_msc, true},
+          {"color-r", subst_renderer_color_r_msc, true},
+          {"color-g", subst_renderer_color_g_msc, true},
+          {"color-b", subst_renderer_color_b_msc, true},
+          {"color-a", subst_renderer_color_a_msc, true},
           {NULL, NULL, false}});
 }
