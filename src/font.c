@@ -293,6 +293,15 @@ Value subst_font_text_width_msc(MescheMemory *mem, int arg_count, Value *args) {
   return NUMBER_VAL(subst_font_text_width(font, text));
 }
 
+Value subst_font_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+  if (arg_count != 1) {
+    subst_log("Function requires 1 parameter.");
+  }
+
+  SubstFont *font = AS_POINTER(args[0])->ptr;
+  return NUMBER_VAL(font->chars['A' - ASCII_CHAR_START].bearing_y);
+}
+
 Value subst_font_render_text_msc(MescheMemory *mem, int arg_count,
                                  Value *args) {
   if (arg_count != 5) {
@@ -317,6 +326,7 @@ void subst_font_module_init(VM *vm) {
           {"font-load", subst_font_load_msc, true},
           {"font-load-file", subst_font_load_file_msc, true},
           {"font-text-width", subst_font_text_width_msc, true},
+          {"font-height", subst_font_height_msc, true},
           {"render-text", subst_font_render_text_msc, true},
           {NULL, NULL, false}});
 }
