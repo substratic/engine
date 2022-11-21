@@ -241,7 +241,7 @@ void subst_font_print_all(const char *family_name) {
   FcConfigDestroy(config);
 }
 
-Value subst_font_load_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_font_load_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 3) {
     subst_log("Function requires 3 parameters.");
   }
@@ -267,10 +267,10 @@ Value subst_font_load_msc(MescheMemory *mem, int arg_count, Value *args) {
     font_path = NULL;
   }
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, font, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, font, true));
 }
 
-Value subst_font_load_file_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_font_load_file_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 2) {
     subst_log("Function requires 2 parameters.");
   }
@@ -279,10 +279,10 @@ Value subst_font_load_file_msc(MescheMemory *mem, int arg_count, Value *args) {
   double size = AS_NUMBER(args[1]);
 
   SubstFont *font = subst_font_load_file(font_path, (int)size);
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, font, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, font, true));
 }
 
-Value subst_font_text_width_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_font_text_width_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 2) {
     subst_log("Function requires 2 parameters.");
   }
@@ -293,7 +293,7 @@ Value subst_font_text_width_msc(MescheMemory *mem, int arg_count, Value *args) {
   return NUMBER_VAL(subst_font_text_width(font, text));
 }
 
-Value subst_font_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_font_height_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires 1 parameter.");
   }
@@ -302,8 +302,7 @@ Value subst_font_height_msc(MescheMemory *mem, int arg_count, Value *args) {
   return NUMBER_VAL(font->chars['A' - ASCII_CHAR_START].bearing_y);
 }
 
-Value subst_font_render_text_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value subst_font_render_text_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 5) {
     subst_log("Function requires 5 parameters.");
   }
