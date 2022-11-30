@@ -1,7 +1,9 @@
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
+#ifndef __EMSCRIPTEN__
 #include <fontconfig/fontconfig.h>
+#endif
 #include <ft2build.h>
 #include <glad/glad.h>
 #include <inttypes.h>
@@ -171,6 +173,8 @@ int subst_font_text_width(SubstFont *font, const char *text) {
   return width;
 }
 
+#ifndef __EMSCRIPTEN__
+
 char *subst_font_resolve_path(const char *font_name) {
   char *font_path = NULL;
 
@@ -241,7 +245,13 @@ void subst_font_print_all(const char *family_name) {
   FcConfigDestroy(config);
 }
 
+#endif
+
 Value subst_font_load_msc(VM *vm, int arg_count, Value *args) {
+#ifdef __EMSCRIPTEN__
+  // TODO: Raise an error!
+  return FALSE_VAL;
+#else
   if (arg_count != 3) {
     subst_log("Function requires 3 parameters.");
   }
@@ -268,6 +278,7 @@ Value subst_font_load_msc(VM *vm, int arg_count, Value *args) {
   }
 
   return OBJECT_VAL(mesche_object_make_pointer(vm, font, true));
+#endif
 }
 
 Value subst_font_load_file_msc(VM *vm, int arg_count, Value *args) {
