@@ -79,7 +79,7 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
 
   // Initialize the font in memory
   SubstFont *subst_font = malloc(sizeof(struct _SubstFont));
-  memset(subst_font, 0, sizeof(subst_font));
+  memset(subst_font, 0, sizeof(sizeof(struct _SubstFont)));
 
   // Remove alignment restriction
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -152,7 +152,7 @@ void subst_texture_module_init(VM *vm) {
           {NULL, NULL, false}});
 }
 
-Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_texture_load_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 2) {
     subst_log("Function requires 2 parameters.");
   }
@@ -161,10 +161,10 @@ Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args) {
   SubstTextureOptions options = {.use_smoothing = !IS_FALSE(args[1])};
   SubstTexture *texture = subst_texture_png_load(file_path->chars, &options);
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, texture, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, texture, true));
 }
 
-Value subst_texture_width_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_texture_width_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires 1 parameter.");
   }
@@ -173,7 +173,7 @@ Value subst_texture_width_msc(MescheMemory *mem, int arg_count, Value *args) {
   return NUMBER_VAL(texture->width);
 }
 
-Value subst_texture_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_texture_height_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires 1 parameter.");
   }

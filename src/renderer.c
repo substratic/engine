@@ -486,8 +486,7 @@ void subst_renderer_save_to_png(SubstRenderer *renderer,
 
 void subst_renderer_end(void) { glfwTerminate(); }
 
-Value subst_renderer_func_render_to_file(MescheMemory *mem, int arg_count,
-                                         Value *args) {
+Value subst_renderer_func_render_to_file(VM *vm, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires a path to the output file.");
   }
@@ -497,7 +496,7 @@ Value subst_renderer_func_render_to_file(MescheMemory *mem, int arg_count,
   memcpy(output_image_path, file_path, strlen(file_path));
 }
 
-Value subst_renderer_create_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_renderer_create_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 1) {
     subst_log("Function requires 1 parameter.");
   }
@@ -508,10 +507,10 @@ Value subst_renderer_create_msc(MescheMemory *mem, int arg_count, Value *args) {
   // Create the renderer
   SubstRenderer *renderer = subst_renderer_create(window);
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, renderer, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, renderer, true));
 }
 
-Value subst_renderer_clear_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_renderer_clear_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 4) {
     subst_log("Function requires 4 parameters.");
   }
@@ -528,8 +527,7 @@ Value subst_renderer_clear_msc(MescheMemory *mem, int arg_count, Value *args) {
   return TRUE_VAL;
 }
 
-Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
-                                      Value *args) {
+Value subst_renderer_swap_buffers_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
 
@@ -539,8 +537,7 @@ Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_renderer_scale_set_msc(MescheMemory *mem, int arg_count,
-                                   Value *args) {
+Value subst_renderer_scale_set_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
   renderer->scale = AS_NUMBER(args[1]);
@@ -553,8 +550,7 @@ Value subst_renderer_scale_set_msc(MescheMemory *mem, int arg_count,
   return UNSPECIFIED_VAL;
 }
 
-Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
-                                   Value *args) {
+Value subst_renderer_draw_rect_msc(VM *vm, int arg_count, Value *args) {
   SubstRenderer *renderer = (SubstRenderer *)AS_POINTER(args[0])->ptr;
   int x = AS_NUMBER(args[1]);
   int y = AS_NUMBER(args[2]);
@@ -568,8 +564,7 @@ Value subst_renderer_draw_rect_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
-                                      Value *args) {
+Value subst_renderer_draw_texture_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
   SubstTexture *texture = (SubstTexture *)AS_POINTER(args[1])->ptr;
@@ -586,7 +581,7 @@ Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
+Value subst_renderer_draw_texture_region_msc(VM *vm, int arg_count,
                                              Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstRenderer *renderer = (SubstRenderer *)ptr->ptr;
@@ -609,49 +604,45 @@ Value subst_renderer_draw_texture_region_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_renderer_rgb_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_renderer_rgb_msc(VM *vm, int arg_count, Value *args) {
   SubstColor *color = malloc(sizeof(SubstColor));
   color->r = AS_NUMBER(args[0]) / 255.0;
   color->g = AS_NUMBER(args[1]) / 255.0;
   color->b = AS_NUMBER(args[2]) / 255.0;
   color->a = 1.0;
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, color, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, color, true));
 }
 
-Value subst_renderer_rgba_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_renderer_rgba_msc(VM *vm, int arg_count, Value *args) {
   SubstColor *color = malloc(sizeof(SubstColor));
   color->r = AS_NUMBER(args[0]) / 255.0;
   color->g = AS_NUMBER(args[1]) / 255.0;
   color->b = AS_NUMBER(args[2]) / 255.0;
   color->a = AS_NUMBER(args[3]) / 255.0;
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, color, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, color, true));
 }
 
-Value subst_renderer_color_r_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value subst_renderer_color_r_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstColor *color = (SubstColor *)ptr->ptr;
   return NUMBER_VAL(color->r * 255.0);
 }
 
-Value subst_renderer_color_g_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value subst_renderer_color_g_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstColor *color = (SubstColor *)ptr->ptr;
   return NUMBER_VAL(color->g * 255.0);
 }
 
-Value subst_renderer_color_b_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value subst_renderer_color_b_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstColor *color = (SubstColor *)ptr->ptr;
   return NUMBER_VAL(color->b * 255.0);
 }
 
-Value subst_renderer_color_a_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value subst_renderer_color_a_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstColor *color = (SubstColor *)ptr->ptr;
   return NUMBER_VAL(color->a * 255.0);

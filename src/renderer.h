@@ -59,14 +59,11 @@ void subst_renderer_draw_rect_fill(SubstRenderer *renderer, float x, float y,
                                    float w, float h, vec4 color);
 
 void subst_renderer_module_init(VM *vm);
-Value subst_renderer_create_msc(MescheMemory *mem, int arg_count, Value *args);
-Value subst_renderer_clear_msc(MescheMemory *mem, int arg_count, Value *args);
-Value subst_renderer_swap_buffers_msc(MescheMemory *mem, int arg_count,
-                                      Value *args);
+Value subst_renderer_create_msc(VM *vm, int arg_count, Value *args);
+Value subst_renderer_clear_msc(VM *vm, int arg_count, Value *args);
+Value subst_renderer_swap_buffers_msc(VM *vm, int arg_count, Value *args);
 
-Value subst_renderer_func_render_to_file(MescheMemory *mem, int arg_count,
-                                         Value *args);
-Value subst_renderer_draw_texture_msc(MescheMemory *mem, int arg_count,
-                                      Value *args);
+Value subst_renderer_func_render_to_file(VM *vm, int arg_count, Value *args);
+Value subst_renderer_draw_texture_msc(VM *vm, int arg_count, Value *args);
 
 #endif

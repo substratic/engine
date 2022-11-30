@@ -32,10 +32,10 @@ const ObjectPointerType SubstInputStateType = {.name = "input-state",
 const ObjectPointerType SubstInputEventType = {
     .name = "input-event", .free_func = input_event_free_func};
 
-Value input_event_create_pointer(MescheMemory *mem, SubstInputEvent event) {
+Value input_event_create_pointer(VM *vm, SubstInputEvent event) {
   SubstInputEvent *event_ptr = malloc(sizeof(SubstInputEvent));
   memcpy(event_ptr, &event, 1);
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, event_ptr, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, event_ptr, true));
 }
 
 void input_event_push(SubstInputState *input_state,
@@ -118,7 +118,7 @@ void input_mouse_scroll_callback(GLFWwindow *window, double offset_x,
   input_event_push(input_state, (SubstInputEvent *)input_event);
 }
 
-Value input_init_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_init_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstWindow *window = (SubstWindow *)ptr->ptr;
 
@@ -133,25 +133,24 @@ Value input_init_msc(MescheMemory *mem, int arg_count, Value *args) {
   glfwSetMouseButtonCallback(window->glfwWindow, input_mouse_button_callback);
   glfwSetCursorPosCallback(window->glfwWindow, input_mouse_position_callback);
 
-  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_state,
-                                                    &SubstInputStateType));
+  return OBJECT_VAL(
+      mesche_object_make_pointer_type(vm, input_state, &SubstInputStateType));
 }
 
-Value input_event_peek_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_peek_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputState *input_state = (SubstInputState *)ptr->ptr;
 
   // Take the first event, remove it from the linked list
   SubstInputEvent *input_event = input_state->first_event;
   if (input_event != NULL) {
-    return OBJECT_VAL(
-        mesche_object_make_pointer((VM *)mem, input_event, false));
+    return OBJECT_VAL(mesche_object_make_pointer(vm, input_event, false));
   } else {
     return FALSE_VAL;
   }
 }
 
-Value input_event_take_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_take_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputState *input_state = (SubstInputState *)ptr->ptr;
 
@@ -164,26 +163,26 @@ Value input_event_take_msc(MescheMemory *mem, int arg_count, Value *args) {
       input_state->last_event = NULL;
     }
 
-    return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, input_event,
-                                                      &SubstInputEventType));
+    return OBJECT_VAL(
+        mesche_object_make_pointer_type(vm, input_event, &SubstInputEventType));
   } else {
     return FALSE_VAL;
   }
 }
 
-Value input_event_key_code_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_key_code_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputKeyEvent *input_event = (SubstInputKeyEvent *)ptr->ptr;
   return NUMBER_VAL(input_event->key_code);
 }
 
-Value input_event_key_down_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_key_down_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)(ptr->ptr);
   return BOOL_VAL(input_event->kind == INPUT_EVENT_KEY_DOWN);
 }
 
-Value input_event_key_up_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_key_up_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   return BOOL_VAL(input_event->kind == INPUT_EVENT_KEY_UP);
@@ -201,90 +200,83 @@ Value input_event_key_up_msc(MescheMemory *mem, int arg_count, Value *args) {
   }                                                                            \
   return FALSE_VAL;
 
-Value input_event_mod_ctrl_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mod_ctrl_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   CHECK_MODIFIER(GLFW_MOD_CONTROL);
 }
 
-Value input_event_mod_alt_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mod_alt_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   CHECK_MODIFIER(GLFW_MOD_ALT);
 }
 
-Value input_event_mod_super_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mod_super_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   CHECK_MODIFIER(GLFW_MOD_SUPER);
 }
 
-Value input_event_mod_shift_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mod_shift_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   CHECK_MODIFIER(GLFW_MOD_SHIFT);
 }
 
-Value input_event_mouse_x_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mouse_x_msc(VM *vm, int arg_count, Value *args) {
   // TODO: Check event kind!
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseMoveEvent *input_event = (SubstInputMouseMoveEvent *)ptr->ptr;
   return NUMBER_VAL(input_event->pos_x);
 }
 
-Value input_event_mouse_y_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value input_event_mouse_y_msc(VM *vm, int arg_count, Value *args) {
   // TODO: Check event kind!
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseMoveEvent *input_event = (SubstInputMouseMoveEvent *)ptr->ptr;
   return NUMBER_VAL(input_event->pos_y);
 }
 
-Value input_event_mouse_move_msc(MescheMemory *mem, int arg_count,
-                                 Value *args) {
+Value input_event_mouse_move_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseMoveEvent *input_event = (SubstInputMouseMoveEvent *)ptr->ptr;
   return BOOL_VAL(input_event->event.kind == INPUT_EVENT_MOUSE_MOVE);
 }
 
-Value input_event_mouse_button_down_msc(MescheMemory *mem, int arg_count,
-                                        Value *args) {
+Value input_event_mouse_button_down_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_BUTTON_DOWN);
 }
 
-Value input_event_mouse_button_up_msc(MescheMemory *mem, int arg_count,
-                                      Value *args) {
+Value input_event_mouse_button_up_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_BUTTON_UP);
 }
 
-Value input_event_mouse_button_msc(MescheMemory *mem, int arg_count,
-                                   Value *args) {
+Value input_event_mouse_button_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseButtonEvent *input_event =
       (SubstInputMouseButtonEvent *)ptr->ptr;
   return NUMBER_VAL(input_event->button);
 }
 
-Value input_event_mouse_scroll_msc(MescheMemory *mem, int arg_count,
-                                   Value *args) {
+Value input_event_mouse_scroll_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputEvent *input_event = (SubstInputEvent *)ptr->ptr;
   return BOOL_VAL(input_event->kind == INPUT_EVENT_MOUSE_SCROLL);
 }
 
-Value input_event_mouse_scroll_x_msc(MescheMemory *mem, int arg_count,
-                                     Value *args) {
+Value input_event_mouse_scroll_x_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseScrollEvent *input_event =
       (SubstInputMouseScrollEvent *)ptr->ptr;
   return NUMBER_VAL(input_event->offset_x);
 }
 
-Value input_event_mouse_scroll_y_msc(MescheMemory *mem, int arg_count,
-                                     Value *args) {
+Value input_event_mouse_scroll_y_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   SubstInputMouseScrollEvent *input_event =
       (SubstInputMouseScrollEvent *)ptr->ptr;

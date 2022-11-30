@@ -1,5 +1,6 @@
 #include <mesche.h>
 
+#include "log.h"
 #include "particle.h"
 #include "renderer.h"
 
@@ -49,7 +50,7 @@ typedef struct {
   ObjectArray *sources;
 } SubstParticleSystem;
 
-void particle_system_mark_func(MescheMemory *mem, void *obj) {
+void particle_system_mark_func(MescheMemory *mem, Object *obj) {
   SubstParticleSystem *system = (SubstParticleSystem *)obj;
   mesche_gc_mark_object((VM *)mem, (Object *)system->sources);
 }
@@ -57,22 +58,22 @@ void particle_system_mark_func(MescheMemory *mem, void *obj) {
 const ObjectPointerType SubstParticleSystemType = {
     .name = "particle-system", .mark_func = particle_system_mark_func};
 
-Value subst_particle_make_system_msc(MescheMemory *mem, int arg_count,
-                                     Value *args) {
+Value subst_particle_make_system_msc(VM *vm, int arg_count, Value *args) {
   SubstParticleSystem *system = malloc(sizeof(SubstParticleSystem));
   system->sources = mesche_object_make_array(
-      (VM *)mem); // malloc(sizeof(SubstParticleSource *) * arg_count);
+      vm); // malloc(sizeof(SubstParticleSource *) * arg_count);
   system->current_time = 0;
   system->origin_x = 0;
   system->origin_y = 0;
 
   // Read in and process every particle source argument
   for (int i = 0; i < arg_count; i++) {
-    mesche_value_array_write(mem, &system->sources->objects, args[i]);
+    mesche_value_array_write((MescheMemory *)vm, &system->sources->objects,
+                             args[i]);
   }
 
-  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, system,
-                                                    &SubstParticleSystemType));
+  return OBJECT_VAL(
+      mesche_object_make_pointer_type(vm, system, &SubstParticleSystemType));
 }
 
 void read_particle_factor(SubstParticleFactor *factor, Value *args,
@@ -95,8 +96,7 @@ void read_particle_factor(SubstParticleFactor *factor, Value *args,
   *index += 1;
 }
 
-Value subst_particle_make_source_msc(MescheMemory *mem, int arg_count,
-                                     Value *args) {
+Value subst_particle_make_source_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 8) {
     subst_log("Function requires 8 parameters.");
   }
@@ -125,8 +125,8 @@ Value subst_particle_make_source_msc(MescheMemory *mem, int arg_count,
   /*                                interval lifetime */
   /*                                vel-x vel-y) */
 
-  return OBJECT_VAL(mesche_object_make_pointer_type((VM *)mem, source,
-                                                    &SubstParticleSourceType));
+  return OBJECT_VAL(
+      mesche_object_make_pointer_type(vm, source, &SubstParticleSourceType));
 }
 
 double rand_double(double min, double max) {
@@ -145,8 +145,7 @@ SubstParticleSource *particle_system_source(SubstParticleSystem *system,
               *)(AS_POINTER(system->sources->objects.values[index])->ptr);
 }
 
-Value subst_particle_system_update_msc(MescheMemory *mem, int arg_count,
-                                       Value *args) {
+Value subst_particle_system_update_msc(VM *vm, int arg_count, Value *args) {
   SubstParticleSystem *system =
       ((SubstParticleSystem *)AS_POINTER(args[0])->ptr);
   double time_delta = AS_NUMBER(args[1]);
@@ -207,8 +206,7 @@ Value subst_particle_system_update_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_particle_system_render_msc(MescheMemory *mem, int arg_count,
-                                       Value *args) {
+Value subst_particle_system_render_msc(VM *vm, int arg_count, Value *args) {
   SubstRenderer *renderer = ((SubstRenderer *)AS_POINTER(args[0])->ptr);
   SubstParticleSystem *system =
       ((SubstParticleSystem *)AS_POINTER(args[1])->ptr);
@@ -233,8 +231,7 @@ Value subst_particle_system_render_msc(MescheMemory *mem, int arg_count,
   return TRUE_VAL;
 }
 
-Value subst_particle_system_origin_set_msc(MescheMemory *mem, int arg_count,
-                                           Value *args) {
+Value subst_particle_system_origin_set_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 3) {
     subst_log("Function requires 3 parameters.");
   }

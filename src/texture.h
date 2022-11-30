@@ -19,12 +19,12 @@ SubstTexture *subst_texture_png_load(char *file_path,
 void subst_texture_png_save(const char *file_path,
                             const unsigned char *image_data,
                             const uint32_t width, const uint32_t height);
-Value subst_texture_func_image_load_internal(MescheMemory *mem, int arg_count,
+Value subst_texture_func_image_load_internal(VM *vm, int arg_count,
                                              Value *args);
 
 void subst_texture_module_init(VM *vm);
-Value subst_texture_load_msc(MescheMemory *mem, int arg_count, Value *args);
-Value subst_texture_width_msc(MescheMemory *mem, int arg_count, Value *args);
-Value subst_texture_height_msc(MescheMemory *mem, int arg_count, Value *args);
+Value subst_texture_load_msc(VM *vm, int arg_count, Value *args);
+Value subst_texture_width_msc(VM *vm, int arg_count, Value *args);
+Value subst_texture_height_msc(VM *vm, int arg_count, Value *args);
 
 #endif

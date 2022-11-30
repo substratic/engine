@@ -92,7 +92,7 @@ void subst_window_destroy(SubstWindow *window) {
   }
 }
 
-Value subst_window_create_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_window_create_msc(VM *vm, int arg_count, Value *args) {
   if (arg_count != 3) {
     subst_log("Function requires 3 number parameters.");
   }
@@ -103,30 +103,29 @@ Value subst_window_create_msc(MescheMemory *mem, int arg_count, Value *args) {
 
   // Create the window
   SubstWindow *window = subst_window_create(width, height, title);
-  window->mesche_mem = mem;
+  window->mesche_mem = (MescheMemory *)vm;
 
-  return OBJECT_VAL(mesche_object_make_pointer((VM *)mem, window, true));
+  return OBJECT_VAL(mesche_object_make_pointer(vm, window, true));
 }
 
-Value subst_window_show_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_window_show_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   subst_window_show((SubstWindow *)ptr->ptr);
 
   return TRUE_VAL;
 }
 
-Value subst_window_width_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_window_width_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   return NUMBER_VAL(((SubstWindow *)ptr->ptr)->width);
 }
 
-Value subst_window_height_msc(MescheMemory *mem, int arg_count, Value *args) {
+Value subst_window_height_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   return NUMBER_VAL(((SubstWindow *)ptr->ptr)->height);
 }
 
-Value subst_window_needs_close_p_msc(MescheMemory *mem, int arg_count,
-                                     Value *args) {
+Value subst_window_needs_close_p_msc(VM *vm, int arg_count, Value *args) {
   ObjectPointer *ptr = AS_POINTER(args[0]);
   glfwPollEvents();
   SubstWindow *window = (SubstWindow *)ptr->ptr;
