@@ -1,5 +1,4 @@
 #define GLFW_INCLUDE_NONE
-
 #include <GLFW/glfw3.h>
 #ifndef __EMSCRIPTEN__
 #include <fontconfig/fontconfig.h>
@@ -33,7 +32,11 @@ struct _SubstFont {
 };
 
 const char *FontVertexShaderText = GLSL(
+#ifdef __EMSCRIPTEN__
+    in vec2 position; in vec2 tex_uv;
+#else
     layout(location = 0) in vec2 position; layout(location = 1) in vec2 tex_uv;
+#endif
 
     uniform mat4 model; uniform mat4 view; uniform mat4 projection;
 
@@ -45,13 +48,14 @@ const char *FontVertexShaderText = GLSL(
     });
 
 const char *FontFragmentShaderText =
-    GLSL(in vec2 tex_coords;
+    GLSL(precision highp float; in vec2 tex_coords;
 
-         uniform sampler2D tex0; uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+         uniform sampler2D tex0; uniform vec4 color; out vec4 out_color;
 
          void main() {
            vec4 sampled = vec4(1.0, 1.0, 1.0, texture(tex0, tex_coords).r);
-           gl_FragColor = color * sampled;
+           out_color = sampled;
+           /* out_color = color * sampled; */
          });
 
 SubstFont *subst_font_load_file(const char *font_path, int font_size) {
@@ -105,7 +109,7 @@ SubstFont *subst_font_load_file(const char *font_path, int font_size) {
     // Create the texture and copy the glyph bitmap into it
     glGenTextures(1, &current_char->texture.texture_id);
     glBindTexture(GL_TEXTURE_2D, current_char->texture.texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, current_char->texture.width,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, current_char->texture.width,
                  current_char->texture.height, 0, GL_RED, GL_UNSIGNED_BYTE,
                  face->glyph->bitmap.buffer);
 

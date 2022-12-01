@@ -17,11 +17,17 @@ SubstWindow *subst_window_create(int width, int height, const char *title) {
     return NULL;
   }
 
-  // Set OpenGL version and profile
+// Set OpenGL version and profile
+#ifdef __EMSCRIPTEN__
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+#else
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   /* glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); */
   /* glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE); */
+#endif
 
 #ifdef __APPLE__
   // Just in case...
@@ -77,7 +83,9 @@ void subst_window_show(SubstWindow *window) {
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
     // Enable textures
+#ifndef __EMSCRIPTEN__
     glEnable(GL_TEXTURE_2D);
+#endif
 
     // Enable multisampling (anti-aliasing)
     /* glEnable(GL_MULTISAMPLE); */

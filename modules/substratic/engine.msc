@@ -2,45 +2,51 @@
   (import (mesche math)
           (mesche time)
           (mesche string)
+          (mesche platform)
           (substratic renderer)))
 
-(define (run-engine-loop . args) :export
+(define (create-engine-loop args)
   (let ((renderer (plist-ref args :renderer))
         (update-func (plist-ref args :update-func))
         (render-func (plist-ref args :render-func))
         (total-time 0)
         (target-delta (/ 1 60))
         (current-time (/ (time-current-msec) 1000))
-        (exit-requested #f))
-    (let next-frame ((new-time 0)
-                     (time-step 0)
-                     (time-delta 0)
-                     (frame-time 0))
-      (begin
-        ;; Calculate the frame time
-        (set! new-time (/ (time-current-msec) 1000))
-        (set! frame-time (- new-time current-time))
-        (set! current-time new-time)
+        (exit-requested #f)
+        (new-time 0)
+        (time-step 0)
+        (time-delta 0)
+        (frame-time 0))
+    (lambda ()
+      ;; Calculate the frame time
+      (set! new-time (/ (time-current-msec) 1000))
+      (set! frame-time (- new-time current-time))
+      (set! current-time new-time)
 
-        ;; Update until we reach the delta max
-        (let next-update ()
-          (if (> frame-time 0)
-              (begin
-                (set! time-delta (min frame-time target-delta))
-                (if (not (update-func time-delta))
-                    (set! exit-requested #t))
-                (set! frame-time (- frame-time time-delta))
-                (set! total-time (+ total-time time-delta))
-                (next-update))))
+      ;; Update until we reach the delta max
+      (let next-update ()
+        (if (> frame-time 0)
+            (begin
+              (set! time-delta (min frame-time target-delta))
+              (if (not (update-func time-delta))
+                  (set! exit-requested #t))
+              (set! frame-time (- frame-time time-delta))
+              (set! total-time (+ total-time time-delta))
+              (next-update))))
 
-        ;; Render the screen and flip the buffers
-        (render-func renderer)
-        (renderer-swap-buffers renderer)
+      ;; Render the screen and flip the buffers
+      (render-func renderer)
+      (renderer-swap-buffers renderer)
+      (not exit-requested))))
 
-        ;; Next frame!
-        (if (not exit-requested)
-            (next-frame 0 0 0 0)
-            (display "Exiting game loop...\n"))))))
+(define (run-engine-loop . args) :export
+  (if (equal? (current-platform) 'web)
+      ;; Let Emscripten drive the loop
+      (set-resume-func! (create-engine-loop args))
+      (let next-frame ((engine-loop (create-engine-loop args)))
+        (if (engine-loop)
+            (next-frame engine-loop)
+            (display "Exiting game loop...\n")))))
 
 (define (make-fps-counter) :export
   (let ((fps #f)

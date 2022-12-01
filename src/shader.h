@@ -17,6 +17,10 @@ typedef struct {
 GLuint subst_shader_compile(const SubstShaderFile *shader_files,
                             uint32_t shader_count);
 
+#ifdef __EMSCRIPTEN__
+#define GLSL(src) "#version 300 es\n" #src
+#else
 #define GLSL(src) "#version 330 core\n" #src
+#endif
 
 #endif

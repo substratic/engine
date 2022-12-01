@@ -1,13 +1,13 @@
-#include "log.h"
-#include "renderer.h"
-#include "util.h"
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
 #include <glad/glad.h>
 #include <inttypes.h>
 #include <stdlib.h>
+
+#include "log.h"
+#include "renderer.h"
+#include "util.h"
 
 uint8_t subst_renderer_initialized = 0;
 
@@ -74,8 +74,12 @@ SubstRenderer *subst_renderer_create(SubstWindow *window) {
   // Make the window's context current before loading OpenGL DLLs
   glfwMakeContextCurrent(window->glfwWindow);
 
-  // Bind to OpenGL functions
+// Bind to OpenGL functions
+#ifdef __EMSCRIPTEN__
+  if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress)) {
+#else
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+#endif
     PANIC("Failed to initialize GLAD!");
     return NULL;
   }

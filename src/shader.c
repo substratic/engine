@@ -4,21 +4,28 @@
 #include <cglm/cglm.h>
 #include <glad/glad.h>
 
-const char *DefaultVertexShaderText =
-    GLSL(layout(location = 0) in vec2 a_vec;
+const char *DefaultVertexShaderText = GLSL(
+#ifdef __EMSCRIPTEN__
+    in vec2 a_vec;
+#else
+    layout(location = 0) in vec2 a_vec;
+#endif
+    uniform mat4 model; uniform mat4 view; uniform mat4 projection;
 
-         uniform mat4 model; uniform mat4 view; uniform mat4 projection;
-
-         void main() {
-           gl_Position = projection * view * model * vec4(a_vec, 0.0, 1.0);
-         });
+    void main() {
+      gl_Position = projection * view * model * vec4(a_vec, 0.0, 1.0);
+    });
 
 const char *DefaultFragmentShaderText =
-    GLSL(uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-         void main() { gl_FragColor = color; });
+    GLSL(precision highp float; uniform vec4 color; out vec4 out_color;
+         void main() { out_color = color; });
 
 const char *TexturedVertexShaderText = GLSL(
+#ifdef __EMSCRIPTEN__
+    in vec2 position; in vec2 tex_uv;
+#else
     layout(location = 0) in vec2 position; layout(location = 1) in vec2 tex_uv;
+#endif
 
     uniform mat4 model; uniform mat4 view; uniform mat4 projection;
 
@@ -29,12 +36,12 @@ const char *TexturedVertexShaderText = GLSL(
       gl_Position = projection * view * model * vec4(position, 0.0, 1.0);
     });
 
-const char *TexturedFragmentShaderText =
-    GLSL(in vec2 tex_coords;
+const char *TexturedFragmentShaderText = GLSL(
+    precision highp float; in vec2 tex_coords;
 
-         uniform sampler2D tex0; uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+    sampler2D tex0; vec4 color = vec4(1.0, 1.0, 1.0, 1.0); out vec4 out_color;
 
-         void main() { gl_FragColor = texture(tex0, tex_coords) * color; });
+    void main() { out_color = texture(tex0, tex_coords) * color; });
 
 GLuint subst_shader_compile(const SubstShaderFile *shader_files,
                             uint32_t shader_count) {

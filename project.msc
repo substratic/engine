@@ -1,25 +1,30 @@
 (define-module (substratic engine)
   (import (mesche fs)
           (mesche build)
+          (mesche string)
           (mesche process)
           (mesche project)
-          (mesche string)))
+          (mesche platform)))
 
-(define glfw-flags (string-append (string-trim (pkg-config "glfw3" :exclude-libs #t))
-                                  " "
-                                  (string-trim (pkg-config "fontconfig" :exclude-libs #t))))
-
-(define c-flags
-  (string-append "-I./src/spng/ "
+(define (c-flags prefix web?)
+  (string-append prefix
+                 "-I" (path-resolve "./include") " "
+                 "-I./src/spng/ "
                  "-I./src/cglm/ "
                  "-I./src/glad/include "
-                 glfw-flags))
+                 (if web?
+                     "-sUSE_GLFW=3 -sUSE_FREETYPE=1 -sUSE_ZLIB=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2"
+                     (string-append (string-append (string-trim (pkg-config "glfw3" :exclude-libs #t))
+                                                   " "
+                                                   (string-trim (pkg-config "fontconfig" :exclude-libs #t)))))))
 
-(define c-libs
-  (string-append  "-lm -ldl -lz "
-                  (string-trim (pkg-config "glfw3" :exclude-cflags #t)) " "
-                  (string-trim (pkg-config "gl" :exclude-cflags #t)) " "
-                  (string-trim (pkg-config "fontconfig" :exclude-cflags #t))))
+(define (c-libs web?)
+  (if web?
+      "-lm -lz"
+      (string-append "-lm -ldl -lz "
+                     (string-trim (pkg-config "glfw3" :exclude-cflags #t)) " "
+                     (string-trim (pkg-config "gl" :exclude-cflags #t)) " "
+                     (string-trim (pkg-config "fontconfig" :exclude-cflags #t)))))
 
 (project :name "Substratic Engine"
          :url "https://github.com/substratic/engine"
@@ -29,20 +34,31 @@
          :configs (list (config :name "dev"
                                 :default #t
                                 :output-path "./bin/dev"
-                                :c-libs c-libs
-                                :c-flags (string-append "-O0 -g -ggdb -DDEV_BUILD -DDEBUG -fsanitize=address "
-                                                        c-flags))
+                                :c-libs (c-libs #f)
+                                :c-flags (c-flags "-O0 -g -ggdb -DDEV_BUILD -DDEBUG -fsanitize=address " #f))
                         (config :name "debug"
-                                :default #t
                                 :output-path "./bin/debug"
-                                :c-libs c-libs
-                                :c-flags (string-append "-O0 -g -ggdb -DDEBUG "
-                                                        c-flags))
+                                :c-libs (c-libs #f)
+                                :c-flags (c-flags "-O0 -g -ggdb -DDEBUG " #f))
 
                         (config :name "release"
                                 :output-path "./bin/release"
-                                :c-libs c-libs
-                                :c-flags (string-append "-O2 -fPIE " c-flags)))
+                                :c-libs (c-libs #f)
+                                :c-flags (c-flags "-O2 -fPIE " #f))
+
+                        (config :name "web-debug"
+                                :output-path "./bin/web-debug"
+                                :ar-exe "emar"
+                                :c-compiler "emcc"
+                                :c-libs (c-libs #t)
+                                :c-flags (c-flags "-O0 -g -ggdb -DDEBUG " #t))
+
+                        (config :name "web-release"
+                                :output-path "./bin/web-release"
+                                :c-libs (c-libs #t)
+                                :c-flags (c-flags "-O2 -fPIE " #t)
+                                :ar-exe "emar"
+                                :c-compiler "emcc"))
 
          :tasks (list (task :name 'substratic-engine:lib
                             :description "Builds the Substratic Engine library."
@@ -50,7 +66,7 @@
                             :runs (steps (compile-source :source-files
                                                          '("lib.c" "log.c" "file.c" "renderer.c" "input.c"
                                                            "font.c" "shader.c" "texture.c" "window.c" "physics.c"
-                                                           "particle.c" "glad/src/glad.c" "spng/spng.c")
+                                                           "particle.c" "spng/spng.c" "glad/src/glad.c")
                                                          :c-flags (from-context '(config mesche-compiler:lib) :c-flags)
                                                          :c-libs (from-context '(config mesche-compiler:lib) :c-libs))
 
@@ -60,8 +76,5 @@
 
                                          (provide-context :library-path (from-context 'substratic-engine:lib/static-library
                                                                                       :library-path)
-                                                          :c-libs c-libs
-                                                          :c-flags (string-append glfw-flags
-                                                                                  " -I" (path-resolve "./include")
-                                                                                  " -I" (path-resolve "./src/cglm/")
-                                                                                  " -I" (path-resolve "./src/glad/include")))))))
+                                                          :c-libs (from-context 'config :c-libs)
+                                                          :c-flags (from-context 'config :c-flags))))))
